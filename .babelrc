@@ -1,0 +1,28 @@
+{
+	"presets": ["env"],
+
+	"plugins":
+	[
+		"transform-runtime",
+		"transform-object-rest-spread",
+		"transform-class-properties"
+	],
+
+  "env":
+  {
+    "es6":
+    {
+      "presets":
+      [
+        ["env", { modules: false }]
+      ],
+
+      "plugins":
+      [
+				"transform-runtime",
+				"transform-object-rest-spread",
+				"transform-class-properties"
+      ]
+    }
+  }
+}
