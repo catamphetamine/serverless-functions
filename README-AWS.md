@@ -47,7 +47,7 @@ Create a new role for deploying Lambdas and attach the following JSON policy to 
 
 Create a new user for deploying Lambdas, add the Lambda deployment role to this user, and create an access key for this user.
 
-Create an `aws` entry in the `serverless.json` file of a project:
+Add an `aws` entry to the `serverless.json` file of a project:
 
 ```js
 {

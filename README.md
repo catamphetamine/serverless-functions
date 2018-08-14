@@ -67,7 +67,7 @@ Add a new `script` to `package.json`:
 ```js
 {
   "scripts": {
-    "run-locally": "serverless run"
+    "run-locally": "serverless run 8888"
   }
 }
 ```
@@ -75,19 +75,19 @@ Add a new `script` to `package.json`:
 Run the functions locally:
 
 ```
-npm run run-locally 8888
+npm run run-locally
 ```
 
 Go to `http://localhost:8888/example-function/123`. It should respond with `{ pathParameter: 123 }`.
 
 ## Input
 
-The function receives named parameters:
+The function receives the following parameters:
 
-  * `event` — Lambda event.
-  * `path` — (alias) URL path parameters.
-  * `query` — (alias) URL query parameters.
-  * `body` — (alias) HTTP request body.
+  * `path` — URL path parameters.
+  * `query` — URL query parameters.
+  * `body` — HTTP request body.
+  * `event` — AWS Lambda event (if deployed on AWS Lambda).
 
 ## Output
 
