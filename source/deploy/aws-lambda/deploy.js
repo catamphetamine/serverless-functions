@@ -142,9 +142,7 @@ async function deployLambda(lambda, stage, config, options = {}) {
         callback(null, {
           // isBase64Encoded: false,
           statusCode: 200,
-          headers: {
-            'Access-Control-Allow-Origin': '*'
-          },
+          headers: CORS_HEADERS,
           body: JSON.stringify(response)
         })
       } catch (error) {
@@ -154,8 +152,9 @@ async function deployLambda(lambda, stage, config, options = {}) {
         const errorMessage = error.httpStatusCode ? error.message : 'Error'
         const statusCode = error.httpStatusCode ? error.httpStatusCode : 500
         callback(null, {
-          isBase64Encoded: false,
+          // isBase64Encoded: false,
           statusCode,
+          headers: CORS_HEADERS,
           body: JSON.stringify({
             errorMessage,
             statusCode
@@ -164,6 +163,13 @@ async function deployLambda(lambda, stage, config, options = {}) {
       } finally {
         ${(options.code && options.code.finally) || ''}
       }
+    }
+
+    const CORS_HEADERS = {
+      // Required for CORS support to work
+      'Access-Control-Allow-Origin' : '*',
+      // Required for cookies, authorization headers with HTTPS
+      'Access-Control-Allow-Credentials' : true
     }
   `
 
