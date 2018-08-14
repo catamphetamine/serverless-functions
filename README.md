@@ -1,54 +1,12 @@
 A toolkit for writing, testing, running and deploying serverless functions (e.g. AWS Lambda).
 
+## Concepts
+
+"Serverless" means splitting an API into a set of independent functions (API endpoints). Each function is a directory having a `function.json` description file and an `index.js` main code file (which can `import` any other code) which `exports default async function` which takes a `parameters` object (HTTP GET query parameters, HTTP POST body, etc) and returns a `response` which could be, for example, a JSON object.
+
 ## Use
 
-Go to Amazon IAM Management Console (`Services` -> `IAM`).
-
-Create a new role for the "API Gateway" service called `apigateway-invoke-lambda` which will be used for calling Lambdas from API Gateway. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships". Attach the following JSON policy to this new `apigateway-invoke-lambda` role:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": "lambda:InvokeFunction",
-    "Resource": "*"
-  }]
-}
-```
-
-Create a new role for running Lambdas and attach an appropriate policy to it (e.g. `AWSLambdaFullAccess`).
-
-Create a new role for deploying Lambdas and attach the following JSON policy to it:
-
-```json
-
-{
-  "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": [
-      "lambda:GetAlias",
-      "lambda:CreateAlias",
-      "lambda:CreateFunction",
-      "lambda:DeleteAlias",
-      "lambda:DeleteFunction",
-      "lambda:GetFunctionConfiguration",
-      "lambda:UpdateAlias",
-      "lambda:UpdateFunctionCode",
-      "lambda:UpdateFunctionConfiguration",
-      "iam:PassRole",
-      "apigateway:PUT",
-      "apigateway:POST"
-    ],
-    "Resource": ["*"]
-  }]
-}
-```
-
-Create a new user for deploying Lambdas, add the Lambda deployment role to this user, and create an access key for this user.
-
-Create a new project for lambda functions.
+Create a new project.
 
 Create a `.babelrc` file in it:
 
@@ -72,19 +30,9 @@ Create a `serverless.json` file in it:
 
 ```json
 {
-  "name": "project-name",
-  "aws": {
-    "accessKeyId": "USER-FOR-DEPLOYING-LAMBDAS-ACCESS-KEY-ID",
-    "secretAccessKey": "hAx0rDaRkNeThAx0rDaRkNeThAx0rDaRkNeT",
-    "apiId": "AWS-API-GATEWAY-API-ID",
-    "region": "us-east-1",
-    "runtime": "nodejs8.10",
-    "role": "arn:aws:iam::1234567890:role/for-running-lambdas"
-  }
+  "name": "project-name"
 }
 ```
-
-If no AWS API Gateway API exists yet then don't add `aws.apiId` parameter yet — it will be created later.
 
 To create a function create a directory anywhere inside the project directory and put `index.js` and `function.json` files in that directory.
 
@@ -93,7 +41,7 @@ To create a function create a directory anywhere inside the project directory an
 ```json
 {
   "name": "function-name",
-  "path": "/function/url/{parameterName}",
+  "path": "/example-function/{parameterName}",
   "method": "GET"
 }
 ```
@@ -102,53 +50,35 @@ To create a function create a directory anywhere inside the project directory an
 
 ```js
 export default async function({ path, body, query, event }) {
-  return `The URL parameter is ${path.parameterName}`
+  return {
+    pathParameter: path.parameterName
+  }
 }
 ```
 
 Install `serverless-functions` package:
 
-<!-- babel-polyfill babel-plugin-transform-object-rest-spread  -->
-
 ```
 npm install serverless-functions --save
 ```
 
-Add new `script`s to `package.json`:
+Add a new `script` to `package.json`:
 
 ```json
 {
   "scripts": {
-    "deploy": "serverless deploy dev",
-    "update-routes": "serverless update-routes dev",
-    "create-api": "serverless create-api"
+    "run-locally": "serverless run"
   }
 }
 ```
 
-If no AWS API Gateway API exists yet then create it:
+Run the functions locally:
 
 ```
-npm run create-api dev
+npm run run-locally 8888
 ```
 
-Where `dev` is the name of the new "stage". It is common to create several "stages": `dev` for development, `prod` for production, `test` for testing the code in QA before rolling it out to `prod`. Additional stages can be created in AWS API Gateway dashboard.
-
-The `create-api` command outputs the new API id: add it as the `aws.apiId` parameter to `serverless.json`.
-
-Deploy the function on the `dev` stage:
-
-```
-npm run deploy <function-name>
-```
-
-Deploy the AWS API Gateway routing configuration for the new function on `dev` stage. This is only needed the first time the function is created, or when its `"path"` or `"method"` change:
-
-```
-npm run update-routes
-```
-
-Go to `https://AWS-API-GATEWAY-API-ID.execute-api.REGION.amazonaws.com/STAGE-NAME/FUNCTION-URL-PATH` and see the function response.
+Go to `http://localhost:8888/example-function/123`. It should respond with `{ pathParameter: 123 }`.
 
 ## Input
 
@@ -182,18 +112,10 @@ export default async function() {
 }
 ```
 
-## Local
+## Streaming
 
-The functions can be run locally without the need to deploy them to a cloud.
+Currently serverless functions seem to not support streaming HTTP request/response data. Use the old-school Node.js stuff for that (e.g. `express`).
 
-```js
-{
-  "scripts": {
-    "run-locally": "serverless run"
-  }
-}
-```
+## AWS Setup
 
-```
-npm run run-locally [port]
-```
+See the [AWS Lambda guide](https://github.com/catamphetamine/serverless-functions/blob/master/README-AWS.md).
