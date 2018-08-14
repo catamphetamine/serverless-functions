@@ -49,7 +49,7 @@ To create a function create a directory anywhere inside the project directory an
 `index.js` is the function code:
 
 ```js
-export default async function({ path, body, query, event }) {
+export default async function({ path, body, query }) {
   return {
     pathParameter: path.parameterName
   }
@@ -87,7 +87,6 @@ The function receives the following parameters:
   * `path` — URL path parameters.
   * `query` — URL query parameters.
   * `body` — HTTP request body.
-  * `event` — AWS Lambda event (if deployed on AWS Lambda).
 
 ## Output
 

@@ -100,3 +100,9 @@ npm run update-routes
 ```
 
 Go to `https://AWS-API-GATEWAY-API-ID.execute-api.REGION.amazonaws.com/STAGE-NAME/FUNCTION-URL-PATH` and see the function response.
+
+## Input
+
+Functions receive the following additonal parameters:
+
+  * `event` — AWS Lambda event.
