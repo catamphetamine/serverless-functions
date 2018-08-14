@@ -28,7 +28,7 @@ Create a `.babelrc` file in it:
 
 Create a `serverless.json` file in it:
 
-```json
+```js
 {
   "name": "project-name"
 }
@@ -38,7 +38,7 @@ To create a function create a directory anywhere inside the project directory an
 
 `function.json` is the description of the function, i.e. its name, which URL does it respond on, to which HTTP method, etc.
 
-```json
+```js
 {
   "name": "function-name",
   "path": "/example-function/{parameterName}",
@@ -64,7 +64,7 @@ npm install serverless-functions --save
 
 Add a new `script` to `package.json`:
 
-```json
+```js
 {
   "scripts": {
     "run-locally": "serverless run"

@@ -6,7 +6,7 @@ Go to Amazon IAM Management Console (`Services` -> `IAM`).
 
 Create a new role for the "API Gateway" service called `apigateway-invoke-lambda` which will be used for calling Lambdas from API Gateway. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships". Attach the following JSON policy to this new `apigateway-invoke-lambda` role:
 
-```json
+```js
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -21,8 +21,7 @@ Create a new role for running Lambdas and attach an appropriate policy to it (e.
 
 Create a new role for deploying Lambdas and attach the following JSON policy to it:
 
-```json
-
+```js
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -50,7 +49,7 @@ Create a new user for deploying Lambdas, add the Lambda deployment role to this 
 
 Create an `aws` entry in the `serverless.json` file of a project:
 
-```json
+```js
 {
   "name": "project-name",
   "aws": {
@@ -68,7 +67,7 @@ If no AWS API Gateway API exists yet then don't add `aws.apiId` parameter yet â€
 
 Add new `script`s to project's `package.json`:
 
-```json
+```js
 {
   "scripts": {
     "deploy": "serverless deploy dev",
