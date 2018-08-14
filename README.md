@@ -4,7 +4,7 @@ A toolkit for writing, testing, running and deploying serverless functions (e.g.
 
 Go to Amazon IAM Management Console (`Services` -> `IAM`).
 
-Create a new role for the "API Gateway" service called `apigateway-invoke-lambda` (for calling Lambdas from API Gateway) and attach the following JSON policy to it:
+Create a new role for the "API Gateway" service called `apigateway-invoke-lambda` which will be used for calling Lambdas from API Gateway. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships". Attach the following JSON policy to this new `apigateway-invoke-lambda` role:
 
 ```json
 {
@@ -180,4 +180,20 @@ export default async function() {
   // Throws a 403 Forbidden error.
   throw new Unauthorized('You are not authorized to perform this action')
 }
+```
+
+## Local
+
+The functions can be run locally without the need to deploy them to a cloud.
+
+```js
+{
+  "scripts": {
+    "run-locally": "serverless run"
+  }
+}
+```
+
+```
+npm run run-locally [port]
 ```

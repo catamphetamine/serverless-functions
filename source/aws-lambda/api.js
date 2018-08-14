@@ -4,9 +4,11 @@ import APIGateway from 'aws-sdk/clients/apigateway'
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/IAM.html
 import IAM from 'aws-sdk/clients/iam'
 
+import colors from 'colors/safe'
+
 import generateSwaggerSpecification from './swagger'
-import { validateLambda } from './validate'
-import findLambdas from './findLambdas'
+import { validateFunctionDescription } from '../validate'
+import findFunctions from '../findFunctions'
 
 export async function createApi(stage, config) {
   const apiGateway = new APIGateway({
@@ -15,7 +17,7 @@ export async function createApi(stage, config) {
     secretAccessKey: config.aws.secretAccessKey
   })
 
-  const lambdas = await findLambdas()
+  const functions = await findFunctions()
 
   // await createRoleIfNotExists(config);
 
@@ -24,19 +26,19 @@ export async function createApi(stage, config) {
 
   // Import the new API into Amazon API Gateway.
   const result = await apiGateway.importRestApi({
-    body: JSON.stringify(generateSwaggerSpec(stage, lambdas, config))
+    body: JSON.stringify(generateSwaggerSpec(stage, functions, config))
   }).promise()
 
   const apiId = result.id
 
   console.log()
-  console.log(`The new API id is "${apiId}". Set it as the "aws.apiId" property of "serverless.json".`)
+  console.log(`The new API id is ${colors.green(apiId)}. Set it as the ${colors.red('aws.apiId')} property of ${colors.yellow('serverless.json')}.`)
 
   // Deploy the API.
   if (stage)
   {
     console.log()
-    console.log(`Deploying the API to stage "${stage}"`)
+    console.log(`Deploying the API to ${colors.yellow(stage)} stage`)
 
     await apiGateway.createDeployment({
       restApiId: apiId,
@@ -54,7 +56,7 @@ export async function updateApi(stage, config) {
     secretAccessKey: config.aws.secretAccessKey
   })
 
-  const lambdas = await findLambdas()
+  const functions = await findFunctions()
 
   // await createRoleIfNotExists(config);
 
@@ -63,7 +65,7 @@ export async function updateApi(stage, config) {
 
   await apiGateway.putRestApi({
     restApiId: config.aws.apiId,
-    body: JSON.stringify(generateSwaggerSpec(stage, lambdas, config)),
+    body: JSON.stringify(generateSwaggerSpec(stage, functions, config)),
     mode: 'overwrite' // 'merge'
   }).promise()
 
@@ -71,7 +73,7 @@ export async function updateApi(stage, config) {
   if (stage)
   {
     console.log()
-    console.log(`Deploying the API to stage "${stage}"`)
+    console.log(`Deploying the API to ${colors.yellow(stage)} stage`)
 
     await apiGateway.createDeployment({
       restApiId: config.aws.apiId,
@@ -80,19 +82,19 @@ export async function updateApi(stage, config) {
   }
 }
 
-function generateSwaggerSpec(stage, lambdas, config) {
+function generateSwaggerSpec(stage, functions, config) {
   const routes = {}
 
-  for (const lambda of lambdas) {
-    validateLambda(lambda)
-    // A lambda can be a scheduled job, not neccessarily an HTTP-called one.
-    if (!lambda.path) {
+  for (const func of functions) {
+    validateFunctionDescription(func)
+    // A function can be a scheduled job, not neccessarily an HTTP-called one.
+    if (!func.path) {
       continue
     }
-    routes[lambda.path] = (routes[lambda.path] || []).concat([{
-      name: lambda.name,
-      method: lambda.method || 'get',
-      parameters: lambda.parameters || generateParametersFromPath(lambda.path)
+    routes[func.path] = (routes[func.path] || []).concat([{
+      name: func.name,
+      method: func.method || 'get',
+      parameters: func.parameters || generateParametersFromPath(func.path)
     }])
   }
 

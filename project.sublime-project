@@ -4,7 +4,7 @@
 		{
 			"follow_symlinks": true,
 			"path": ".",
-			"folder_exclude_patterns": ["node_modules", "coverage", "commonjs", "es6", "project.sublime-workspace"]
+			"folder_exclude_patterns": ["node_modules", "coverage", "commonjs", "modules", "project.sublime-workspace"]
 		}
 	],
   "settings":

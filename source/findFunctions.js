@@ -1,30 +1,27 @@
 import fs from 'fs'
 import path from 'path'
 
-/**
- * (walks the subdirectory tree recursively).
- */
-export default async function findLambdas(lambdaNames, directory = process.cwd(), options = {}) {
-  const lambdas = await _findLambdas(lambdaNames && lambdaNames.slice(), directory, options)
-  if (lambdaNames) {
-    const foundLambdaNames = lambdas.map(_ => _.name)
-    const notFoundLambdaNames = lambdaNames.filter(_ => foundLambdaNames.indexOf(_) < 0)
-    if (notFoundLambdaNames.length > 0) {
-      throw new Error(`The following lambdas were not found: ${notFoundLambdaNames.join(', ')}.`)
+export default async function findFunctions(functionNames, directory = process.cwd(), options = {}) {
+  const functions = await _findFunctions(functionNames && functionNames.slice(), directory, options)
+  if (functionNames) {
+    const foundFunctionNames = functions.map(_ => _.name)
+    const notFoundFunctionNames = functionNames.filter(_ => foundFunctionNames.indexOf(_) < 0)
+    if (notFoundFunctionNames.length > 0) {
+      throw new Error(`The following functions were not found: ${notFoundFunctionNames.join(', ')}.`)
     }
   }
-  return lambdas
+  return functions
 }
 
 /**
  * (walks the subdirectory tree recursively).
  */
-function _findLambdas(lambdaNames, directory = process.cwd(), options = {}) {
+function _findFunctions(functionNames, directory = process.cwd(), options = {}) {
   options.ignore = options.ignore || [ /node_modules/ ]
 
   return new Promise((resolve, reject) =>
   {
-    if (lambdaNames && lambdaNames.length === 0) {
+    if (functionNames && functionNames.length === 0) {
       return resolve([])
     }
 
@@ -51,19 +48,19 @@ function _findLambdas(lambdaNames, directory = process.cwd(), options = {}) {
               fs.readFile(path.join(childPath, 'function.json'), 'utf8', (error, contents) => {
                 if (error) {
                   // If `function.json` doesn't exist then search recursively.
-                  _findLambdas(lambdaNames, childPath).then(resolve)
+                  _findFunctions(functionNames, childPath).then(resolve)
                   return
                 }
                 const lambda = {
                   directory: childPath,
                   ...JSON.parse(contents)
                 }
-                if (lambdaNames) {
-                  const index = lambdaNames.indexOf(lambda.name)
+                if (functionNames) {
+                  const index = functionNames.indexOf(lambda.name)
                   if (index < 0) {
                     return resolve([])
                   }
-                  lambdaNames.splice(index, 1)
+                  functionNames.splice(index, 1)
                 }
                 resolve([lambda])
               })

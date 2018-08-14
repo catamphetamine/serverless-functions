@@ -4,9 +4,10 @@ var path = require('path')
 var fs = require('fs')
 var colors = require('colors/safe')
 
-var createApi = require('../commonjs/deploy/aws-lambda/api').createApi
-var updateApi = require('../commonjs/deploy/aws-lambda/api').updateApi
-var deploy = require('../commonjs/deploy/aws-lambda/deploy').default
+var createApi = require('../commonjs/aws-lambda/api').createApi
+var updateApi = require('../commonjs/aws-lambda/api').updateApi
+var deploy = require('../commonjs/aws-lambda/deploy').default
+var run = require('../commonjs/run').default
 
 var command = process.argv[2]
 var config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'serverless.json')))
@@ -28,6 +29,12 @@ switch (command)
 			functionNames = null
 		}
 		return deploy(functionNames, stage, config).catch(onError)
+
+	case 'run':
+		var port = process.argv[3] || '8080'
+		return run(port, config)
+			.then(() => console.log('The API is listening on ' + colors.green('http://localhost:' + port)))
+			.catch(onError)
 
 	default:
 		usage()
@@ -57,11 +64,15 @@ function usage(reason)
 	console.log('')
 	console.log(' * Update ("deploy") API Gateway API:')
 	console.log('')
-	console.log('   serverless update-api <stage-name>')
+	console.log('   serverless update-routes <stage-name>')
 	console.log('')
-	console.log(' * Deploy a Lambda (or Lambdas, or all Lambdas):')
+	console.log(' * Deploy a function (or some functions, or all functions):')
 	console.log('')
 	console.log('   serverless deploy <stage-name> [function-name, function-name, ...]')
+	console.log('')
+	console.log(' * Run functions locally:')
+	console.log('')
+	console.log('   serverless run [port]')
 
 	if (reason) {
 		return process.exit(1)

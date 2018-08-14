@@ -1,4 +1,4 @@
-import { validateIAMRole, IAM_ROLE_REG_EXP } from './validate'
+import { validateIAMRole, getAWSAccountId } from './utility'
 
 // Swagger 2.0 specification generator.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md
@@ -32,9 +32,9 @@ export default function(stage, methods, options) {
 // Returns Swagger "Operation Object".
 // (HTTP method description for an endpoint)
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#operationObject
-function generateMethodSpecification(stage, lambdaName, parameters, { projectName, role, region, consumesContentTypes, producesContentTypes, requestTemplates, responseTemplates }) {
+function generateMethodSpecification(stage, functionName, parameters, { projectName, role, region, consumesContentTypes, producesContentTypes, requestTemplates, responseTemplates }) {
   validateIAMRole(role)
-  const awsAccountId = role.match(IAM_ROLE_REG_EXP)[1]
+  const awsAccountId = getAWSAccountId(role)
   return {
     consumes: consumesContentTypes,
     produces: producesContentTypes || ['application/json'],
@@ -42,7 +42,7 @@ function generateMethodSpecification(stage, lambdaName, parameters, { projectNam
     // https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-swagger-extensions-integration.html
     'x-amazon-apigateway-integration': {
       credentials: `arn:aws:iam::${awsAccountId}:role/apigateway-invoke-lambda`,
-      uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${awsAccountId}:function:${projectName}-${lambdaName}:${stage}/invocations`,
+      uri: `arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${region}:${awsAccountId}:function:${projectName}-${functionName}:${stage}/invocations`,
       passthroughBehavior: 'when_no_match', // 'when_no_templates',
       httpMethod: 'POST',
       type: 'aws_proxy'

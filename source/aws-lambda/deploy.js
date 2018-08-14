@@ -1,27 +1,30 @@
 import os from 'os'
 import path from 'path'
 import fs from 'fs-extra'
-// https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html
-import AWSLambda from 'aws-sdk/clients/lambda'
 import filesize from 'filesize'
 import uuid from 'uuid'
 import { ReadableStream } from 'memory-streams'
+import colors from 'colors/safe'
 
-import Archive from './Archive'
-import bundle from './webpack'
-import findLambdas from './findLambdas'
-import { validateLambda, validateIAMRole } from './validate'
+// https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html
+import AWSLambda from 'aws-sdk/clients/lambda'
 
-export default async function deploy(lambdaNames, stage, config, options) {
-  const lambdas = await findLambdas(lambdaNames)
+import Archive from '../Archive'
+import bundle from '../webpack'
+import findFunctions from '../findFunctions'
+import { validateFunctionDescription } from '../validate'
+import { validateIAMRole } from './utility'
 
-  for (const lambda of lambdas) {
-    validateLambda(lambda)
-    await deployLambda(lambda, stage, config, options)
+export default async function deploy(functionNames, stage, config, options) {
+  const functions = await findFunctions(functionNames)
+
+  for (const func of functions) {
+    validateFunctionDescription(func)
+    await deployFunction(func, stage, config, options)
   }
 }
 
-async function deployLambda(lambda, stage, config, options = {}) {
+async function deployFunction(func, stage, config, options = {}) {
   const Lambda = new AWSLambda({
     region: config.aws.region,
     accessKeyId: config.aws.accessKeyId,
@@ -30,15 +33,16 @@ async function deployLambda(lambda, stage, config, options = {}) {
 
   console.log()
   console.log('-----------------------------------------------------')
-  console.log(`Deploying "${lambda.name}" to "${stage}" stage.`)
+  console.log(`Deploying ${colors.green(func.name)} to ${colors.yellow(stage)} stage.`)
   console.log('-----------------------------------------------------')
+  console.log()
 
   // // Bundle the function using Webpack.
-  // const compiledFunction = await bundle(`${lambda.directory}/index.js`, null, {
+  // const compiledFunction = await bundle(`${func.directory}/index.js`, null, {
   //   ...
   // })
 
-  // fs.copySync(`${lambda.directory}/index.js`, functionOutputPath)
+  // fs.copySync(`${func.directory}/index.js`, functionOutputPath)
 
   // const compiledFunction = fs.readFileSync(functionOutputPath).toString()
 
@@ -112,7 +116,7 @@ async function deployLambda(lambda, stage, config, options = {}) {
   const handlerOutputPath = `${outputBasePath}.handler.js`
   const packageOutputPath = `${outputBasePath}.zip`
 
-  fs.copySync(`${lambda.directory}/index.js`, functionOutputPath)
+  fs.copySync(`${func.directory}/index.js`, functionOutputPath)
 
   const handler =
   `
@@ -173,10 +177,10 @@ async function deployLambda(lambda, stage, config, options = {}) {
     }
   `
 
-  // Could also create a file in the lambda directory for simplicity.
+  // Could also create a file in the function directory for simplicity.
   // Though it would require write access to that directory.
   //
-  // const temporaryOutputPath = `${lambda.directory}/index.handler.js`
+  // const temporaryOutputPath = `${func.directory}/index.handler.js`
   // if (fs.accessSync(temporaryOutputPath)) {
   //   throw new Error(`File "${temporaryOutputPath}" already exists. Delete it manually and re-run.`)
   // }
@@ -210,7 +214,7 @@ async function deployLambda(lambda, stage, config, options = {}) {
   const zipFile = fs.readFileSync(packageOutputPath)
   // const zipFile = new ReadableStream(output)
 
-  const functionName = `${config.name}-${lambda.name}`
+  const functionName = `${config.name}-${func.name}`
 
   // If this lamda existed previously then update its code.
   let exists = false
@@ -235,8 +239,8 @@ async function deployLambda(lambda, stage, config, options = {}) {
     FunctionName: functionName,
     Handler: 'index.handler',
     Role: config.aws.role,
-    MemorySize: lambda.memory || 1536,
-    Timeout: lambda.timeout || config.timeout || 15,
+    MemorySize: func.memory || 1536,
+    Timeout: func.timeout || config.timeout || 15,
     Runtime: runtime
   }
 
@@ -249,20 +253,20 @@ async function deployLambda(lambda, stage, config, options = {}) {
   }
 
   // Environment variables.
-  if (lambda.env || config.env) {
+  if (func.env || config.env) {
     lambdaConfiguration.Environment = {
       Variables: {
         ...config.env,
-        ...lambda.env
+        ...func.env
       }
     }
   }
 
   // Tags for cost monitoring, etc.
-  if (config.tags || lambda.tags) {
+  if (config.tags || func.tags) {
     lambdaConfiguration.Tags = {
       ...config.tags,
-      ...lambda.tags
+      ...func.tags
     }
   }
 

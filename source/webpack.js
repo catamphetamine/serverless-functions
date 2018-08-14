@@ -48,8 +48,6 @@ export default function bundle(inputFile, outputFile, options = {}) {
     })
   }
 
-  const rootDirectory = path.resolve(__dirname, '../../..')
-
   // Bundle.
   return new Promise((resolve, reject) => {
     const compiler = webpack({
@@ -130,12 +128,6 @@ export default function bundle(inputFile, outputFile, options = {}) {
           path.join(process.cwd(), 'node_modules'),
           'node_modules'
         ],
-        // moduleLoaders: [
-        //   // Resolve loaders (e.g. `file-loader`) from `serverless-functions/node_modules`.
-        //   // path.join(__dirname, rootDirectory, 'node_modules'),
-        //   path.relative(process.cwd(), path.join(__dirname, rootDirectory, 'node_modules')),
-        //   'node_modules'
-        // ],
         alias: {
           'pg-native': path.resolve(__dirname, './webpack-empty-module.js'),
           ...options.alias
