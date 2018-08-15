@@ -4,7 +4,7 @@ Prerequisites: read the main [README](https://github.com/catamphetamine/serverle
 
 Go to Amazon IAM Management Console (`Services` -> `IAM`).
 
-Create a new role for the "API Gateway" service called `apigateway-invoke-lambda` which will be used for calling Lambdas from API Gateway. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships". Attach the following JSON policy to this new `apigateway-invoke-lambda` role:
+Create a new role for the "API Gateway" service called `apigateway-invoke-lambda` which will be used for calling Lambdas from API Gateway. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships" (`Service: apigateway.amazonaws.com`). Attach the following JSON policy to this new `apigateway-invoke-lambda` role:
 
 ```js
 {
@@ -17,7 +17,7 @@ Create a new role for the "API Gateway" service called `apigateway-invoke-lambda
 }
 ```
 
-Create a new role for running Lambdas and attach an appropriate policy to it (e.g. `AWSLambdaFullAccess`).
+Create a new role for running Lambdas. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships" (`Service: lambda.amazonaws.com`). Attach an appropriate policy to this new role (e.g. `AWSLambdaFullAccess`).
 
 Create a new role for deploying Lambdas and attach the following JSON policy to it:
 
