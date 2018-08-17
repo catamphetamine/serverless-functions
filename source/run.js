@@ -30,7 +30,11 @@ export default async function run(port, config) {
 			}
 		}
 
-		const module = require(path.join(func.directory, 'index.js'))
+		const functionFilePath = path.join(func.directory, 'index.js')
+		if (config.cache !== true) {
+			delete require.cache[functionFilePath]
+		}
+		const module = require(functionFilePath)
 		let response
 		await module.handler({
 			queryStringParameters: query,
