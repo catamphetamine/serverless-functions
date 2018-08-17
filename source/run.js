@@ -38,10 +38,12 @@ export default async function run(port, config) {
 			body,
 			headers
 		}, {}, (error, result) => {
-			if (error.statusCode) {
-				result = error
-			} else {
-				throw error
+			if (error) {
+				if (error.statusCode) {
+					result = error
+				} else {
+					throw error
+				}
 			}
 			response = {
 				status: result.statusCode,
