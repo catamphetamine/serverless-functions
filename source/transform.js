@@ -3,10 +3,10 @@ import fs from 'fs'
 
 import babelCompile, { shouldIgnore } from './babel'
 
-export default function installTransformHook(functions, transform) {
+export default function installTransformHook(functions, transform, options) {
 	const oldHook = require.extensions['.js']
 	require.extensions['.js'] = function (m, filename) {
-    if (shouldIgnore(filename)) {
+    if (shouldIgnore(filename, options.cwd)) {
       return oldHook(m, filename)
     }
 		let code = fs.readFileSync(filename, 'utf-8')

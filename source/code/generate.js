@@ -15,14 +15,14 @@ const CODE_PIECES = [
 	'finally'
 ]
 
-export default function({ path: functionFilePath, code, func, stage }, config) {
+export default function({ path: functionFilePath, code, func, stage, cwd }, config) {
 	const codePieces = {}
 
 	for (const codePieceName of CODE_PIECES) {
 		codePieces[codePieceName] = fs.readFileSync(
 			config.code[codePieceName]
 			?
-			path.resolve(process.cwd(), config.code[codePieceName])
+			path.resolve(cwd || process.cwd(), config.code[codePieceName])
 			:
 			path.resolve(__dirname, `./pieces/${codePieceName}.js`)
 		,

@@ -6,21 +6,22 @@ import findFunctions from './findFunctions'
 import installTransformHook from './transform'
 import generateCode from './code/generate'
 
-export default async function run(stage, port, config) {
-	const functions = await findFunctions()
+export default async function run(stage, port, config, options = {}) {
+	const functions = await findFunctions(null, options.cwd)
 
 	installTransformHook(functions, (code, filename) => generateCode({
-    func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
-    stage,
+		cwd: options.cwd,
+		func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
+		stage,
 		code
-	}, config))
+	}, config, options), options)
 
-	await runServer(port, async (requestPath, { query, body, headers }) => {
+	await runServer(port, async (method, requestPath, { query, body, headers }) => {
 		let func
 
 		let pathParameters
 		for (const _func of functions) {
-			pathParameters = matchPath(requestPath, _func)
+			pathParameters = matchFunctionByMethodAndPath(method, requestPath, _func)
 			if (pathParameters) {
 				func = _func
 				break
@@ -29,6 +30,10 @@ export default async function run(stage, port, config) {
 
 		let httpResponse
 
+		// Theoretically it should return "405 Method not allowed"
+		// along with the "Allow" HTTP header (e.g. "Allow: GET, POST, HEAD")
+		// if the path does exist but no function for the HTTP request method exists.
+		// https://stackoverflow.com/questions/35387209/which-status-to-return-for-request-to-invalid-url-for-different-http-methods
 		if (!func) {
 			return {
 				status: 404,
@@ -73,7 +78,7 @@ function runServer(port, handler) {
 		// Parse application/json.
 		app.use(bodyParser.json())
 		app.use((request, response) => {
-			handler(request.path, {
+			handler(request.method, request.path, {
 				query: request.query,
 				body: request.body,
 				headers: request.headers
@@ -87,7 +92,10 @@ function runServer(port, handler) {
 	})
 }
 
-function matchPath(path, func) {
+function matchFunctionByMethodAndPath(method, path, func) {
+	if (method !== (func.method || 'GET')) {
+		return
+	}
 	const pathParts = path.split('/')
 	const funcPathParts = func.path.split('/')
 	if (pathParts.length !== funcPathParts.length) {

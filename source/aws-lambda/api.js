@@ -9,14 +9,14 @@ import colors from 'colors/safe'
 import generateSwaggerSpecification from './swagger'
 import findFunctions from '../findFunctions'
 
-export async function createApi(stage, config) {
+export async function createApi(stage, config, options = {}) {
   const apiGateway = new APIGateway({
     region: config.aws.region,
     accessKeyId: config.aws.accessKeyId,
     secretAccessKey: config.aws.secretAccessKey
   })
 
-  const functions = await findFunctions()
+  const functions = await findFunctions(null, options.cwd)
 
   // await createRoleIfNotExists(config);
 
@@ -46,14 +46,14 @@ export async function createApi(stage, config) {
   return apiId
 }
 
-export async function updateApi(stage, config) {
+export async function updateApi(stage, config, options = {}) {
   const apiGateway = new APIGateway({
     region: config.aws.region,
     accessKeyId: config.aws.accessKeyId,
     secretAccessKey: config.aws.secretAccessKey
   })
 
-  const functions = await findFunctions()
+  const functions = await findFunctions(null, options.cwd)
 
   // await createRoleIfNotExists(config);
 

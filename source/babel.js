@@ -34,12 +34,6 @@ let only;
 
 const maps = {};
 
-const cwd = process.cwd();
-
-function getRelativePath(filename) {
-  return path.relative(cwd, filename);
-}
-
 function mtime(filename) {
   return +fs.statSync(filename).mtime;
 }
@@ -87,9 +81,9 @@ export default function compile(code, filename) {
   return result.code;
 }
 
-export function shouldIgnore(filename) {
+export function shouldIgnore(filename, cwd = process.cwd()) {
   if (!ignore && !only) {
-    return getRelativePath(filename).split(path.sep).indexOf("node_modules") >= 0;
+    return path.relative(cwd, filename).split(path.sep).indexOf("node_modules") >= 0;
   } else {
     return util.shouldIgnore(filename, ignore || [], only);
   }

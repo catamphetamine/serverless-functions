@@ -18,7 +18,7 @@ export default async function findFunctions(functionNames, directory = process.c
 /**
  * (walks the subdirectory tree recursively).
  */
-function _findFunctions(functionNames, directory = process.cwd(), options = {}) {
+function _findFunctions(functionNames, directory, options) {
   options.ignore = options.ignore || [ /node_modules/ ]
 
   return new Promise((resolve, reject) =>
@@ -50,7 +50,7 @@ function _findFunctions(functionNames, directory = process.cwd(), options = {}) 
               fs.readFile(path.join(childPath, 'function.json'), 'utf8', (error, contents) => {
                 if (error) {
                   // If `function.json` doesn't exist then search recursively.
-                  _findFunctions(functionNames, childPath).then(resolve)
+                  _findFunctions(functionNames, childPath, options).then(resolve)
                   return
                 }
                 const lambda = JSON.parse(contents)

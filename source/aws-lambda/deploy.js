@@ -15,15 +15,15 @@ import findFunctions from '../findFunctions'
 import { validateIAMRole } from './utility'
 import generateCode from '../code/generate'
 
-export default async function deploy(functionNames, stage, config, options) {
-  const functions = await findFunctions(functionNames)
+export default async function deploy(functionNames, stage, config, options = {}) {
+  const functions = await findFunctions(functionNames, options.cwd)
 
   for (const func of functions) {
     await deployFunction(func, stage, config, options)
   }
 }
 
-async function deployFunction(func, stage, config, options = {}) {
+async function deployFunction(func, stage, config, options) {
   const Lambda = new AWSLambda({
     region: config.aws.region,
     accessKeyId: config.aws.accessKeyId,
@@ -120,6 +120,7 @@ async function deployFunction(func, stage, config, options = {}) {
   const handlerOutputPathLocal = path.resolve(func.directory, `index.${uuid.v4()}.js`)
 
   fs.writeFileSync(handlerOutputPathLocal, generateCode({
+    cwd: options.cwd,
     func,
     stage,
     path: '.'

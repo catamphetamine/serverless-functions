@@ -109,3 +109,13 @@ Functions receive the following additonal parameters:
 
   * `context` — AWS Lambda context.
 
+## API
+
+```js
+import { createApi, updateRoutes, deploy } from 'serverless-functions/aws-lambda'
+import config from './serverless.json'
+
+await createApi(stage, config, { cwd: process.cwd() })
+await updateRoutes(stage, config, { cwd: process.cwd() })
+await deploy(functionNames, stage, config, { cwd: process.cwd() })
+```
