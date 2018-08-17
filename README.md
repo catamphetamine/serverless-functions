@@ -161,12 +161,11 @@ Each of the `$` parameters (except `$handler`) can be customized by adding a res
 import Database from './database'
 import config from './config'
 
-// Global variable accessible inside functions.
-let database
-
 function $initialize() {
-  database = new Database(config.database)
+  const database = new Database(config.database)
   database.connect()
+  // Make the `database` accessible from functions.
+  global.database = database
 }
 ```
 
@@ -182,7 +181,7 @@ export default async function() {
 
 ## Globals
 
-The execution envirnoment provides the following utility global variables:
+The execution envirnoment provides the following global constants:
 
   * `STAGE` — the current "stage" (e.g. `dev`, `prod`, `test`).
   * `FUNCTION` — the contents of `function.json`.

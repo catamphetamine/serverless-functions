@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
+import { validateFunctionDescription } from './validate'
+
 export default async function findFunctions(functionNames, directory = process.cwd(), options = {}) {
   const functions = await _findFunctions(functionNames && functionNames.slice(), directory, options)
   if (functionNames) {
@@ -51,10 +53,7 @@ function _findFunctions(functionNames, directory = process.cwd(), options = {}) 
                   _findFunctions(functionNames, childPath).then(resolve)
                   return
                 }
-                const lambda = {
-                  directory: childPath,
-                  ...JSON.parse(contents)
-                }
+                const lambda = JSON.parse(contents)
                 if (functionNames) {
                   const index = functionNames.indexOf(lambda.name)
                   if (index < 0) {
@@ -62,6 +61,8 @@ function _findFunctions(functionNames, directory = process.cwd(), options = {}) 
                   }
                   functionNames.splice(index, 1)
                 }
+                validateFunctionDescription(lambda)
+                lambda.directory = childPath
                 resolve([lambda])
               })
             } else if (stats.isFile()) {

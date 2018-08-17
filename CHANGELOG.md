@@ -3,6 +3,8 @@
 
   * (breaking change) `serverless run` command arguments changed: now it takes `stage` and then `port` (also no default value for `port` now).
 
+  * Added `context` parameter with `stage` and `func`.
+
 0.1.0 / 12.08.2018
 ==================
 

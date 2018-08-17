@@ -12,7 +12,6 @@ import AWSLambda from 'aws-sdk/clients/lambda'
 import Archive from '../Archive'
 import bundle from '../webpack'
 import findFunctions from '../findFunctions'
-import { validateFunctionDescription } from '../validate'
 import { validateIAMRole } from './utility'
 import generateCode from '../code/generate'
 
@@ -20,7 +19,6 @@ export default async function deploy(functionNames, stage, config, options) {
   const functions = await findFunctions(functionNames)
 
   for (const func of functions) {
-    validateFunctionDescription(func)
     await deployFunction(func, stage, config, options)
   }
 }
@@ -121,12 +119,6 @@ async function deployFunction(func, stage, config, options = {}) {
 
   const handlerOutputPathLocal = path.resolve(func.directory, `index.${uuid.v4()}.js`)
 
-  // Creates a file in the function directory.
-  // Requires write access to that directory.
-  if (fs.accessSync(handlerOutputPathLocal)) {
-    throw new Error(`File "${handlerOutputPathLocal}" already exists. Delete it manually and re-run the function deploy command.`)
-  }
-
   fs.writeFileSync(handlerOutputPathLocal, generateCode({
     func,
     stage,
@@ -154,7 +146,7 @@ async function deployFunction(func, stage, config, options = {}) {
   const { size } = await archive.write()
 
   // Clean up.
-  fs.unlinkSync(functionOutputPath)
+  // fs.unlinkSync(functionOutputPath)
   fs.unlinkSync(handlerOutputPath)
   fs.unlinkSync(`${handlerOutputPath}.map`)
 

@@ -7,7 +7,6 @@ import IAM from 'aws-sdk/clients/iam'
 import colors from 'colors/safe'
 
 import generateSwaggerSpecification from './swagger'
-import { validateFunctionDescription } from '../validate'
 import findFunctions from '../findFunctions'
 
 export async function createApi(stage, config) {
@@ -22,7 +21,6 @@ export async function createApi(stage, config) {
   // await createRoleIfNotExists(config);
 
   console.log(`Creating API`)
-  console.log()
 
   // Import the new API into Amazon API Gateway.
   const result = await apiGateway.importRestApi({
@@ -35,8 +33,7 @@ export async function createApi(stage, config) {
   console.log(`The new API id is ${colors.green(apiId)}. Set it as the ${colors.red('aws.apiId')} property of ${colors.yellow('serverless.json')}.`)
 
   // Deploy the API.
-  if (stage)
-  {
+  if (stage) {
     console.log()
     console.log(`Deploying the API to ${colors.yellow(stage)} stage`)
 
@@ -61,7 +58,6 @@ export async function updateApi(stage, config) {
   // await createRoleIfNotExists(config);
 
   console.log(`Updating API "${config.aws.apiId}"`)
-  console.log()
 
   await apiGateway.putRestApi({
     restApiId: config.aws.apiId,
@@ -70,8 +66,7 @@ export async function updateApi(stage, config) {
   }).promise()
 
   // Deploy the updated API.
-  if (stage)
-  {
+  if (stage) {
     console.log()
     console.log(`Deploying the API to ${colors.yellow(stage)} stage`)
 
@@ -86,7 +81,6 @@ function generateSwaggerSpec(stage, functions, config) {
   const routes = {}
 
   for (const func of functions) {
-    validateFunctionDescription(func)
     // A function can be a scheduled job, not neccessarily an HTTP-called one.
     if (!func.path) {
       continue
