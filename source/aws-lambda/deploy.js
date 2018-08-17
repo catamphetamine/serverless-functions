@@ -127,7 +127,11 @@ async function deployFunction(func, stage, config, options = {}) {
     throw new Error(`File "${handlerOutputPathLocal}" already exists. Delete it manually and re-run the function deploy command.`)
   }
 
-  fs.writeFileSync(handlerOutputPathLocal, generateCode({ path: '.' }, config))
+  fs.writeFileSync(handlerOutputPathLocal, generateCode({
+    func,
+    stage,
+    path: '.'
+  }, config))
 
   const runtime = config.aws.runtime || 'nodejs6.10'
 

@@ -12,7 +12,7 @@ const CODE_PIECES = [
   'finally'
 ]
 
-export default function(handler, config) {
+export default function({ path: functionFilePath, code, func, stage }, config) {
   const codePieces = {}
 
   for (const codePieceName of CODE_PIECES) {
@@ -37,9 +37,13 @@ export default function(handler, config) {
     // Could be a simple "import".
     // import 'babel-polyfill'
 
-    ${ handler.path ? 'import $handler from ' + JSON.stringify(handler.path) : handler.code.replace('export default', 'const $handler = ') }
+    ${ functionFilePath ? 'import $handler from ' + JSON.stringify(functionFilePath) : code.replace('export default', 'const $handler = ') }
 
     ${CODE_PIECES.map(_ => codePieces[_]).join(';\n\n')}
+
+    const STAGE = ${JSON.stringify(stage)}
+
+    const FUNCTION = JSON.parse(${JSON.stringify(JSON.stringify(func))})
 
     const CORS_HEADERS = {
       // Required for CORS support to work.

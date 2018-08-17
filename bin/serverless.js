@@ -31,9 +31,10 @@ switch (command)
 		return deploy(functionNames, stage, config).catch(onError)
 
 	case 'run':
-		var port = process.argv[3] || '8080'
-		return run(port, config)
-			.then(() => console.log('The API is listening on ' + colors.green('http://localhost:' + port)))
+		var stage = process.argv[3]
+		var port = process.argv[4]
+		return run(stage, port, config)
+			.then(() => console.log('The ' + colors.yellow(stage) + ' API is listening on ' + colors.green('http://localhost:' + port)))
 			.catch(onError)
 
 	default:
@@ -72,7 +73,7 @@ function usage(reason)
 	console.log('')
 	console.log(' * Run functions locally:')
 	console.log('')
-	console.log('   serverless run [port]')
+	console.log('   serverless run <stage-name> <port>')
 
 	if (reason) {
 		return process.exit(1)

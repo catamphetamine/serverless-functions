@@ -12,7 +12,7 @@ export default function installTransformHook(functions, transform) {
 		let code = fs.readFileSync(filename, 'utf-8')
 		for (const func of functions) {
 			if (path.join(`${func.directory}`, 'index.js') === filename) {
-				code = transform(code)
+				code = transform(code, filename)
 				break
 			}
 		}

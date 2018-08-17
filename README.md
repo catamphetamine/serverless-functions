@@ -67,7 +67,7 @@ Add a new `script` to `package.json`:
 ```js
 {
   "scripts": {
-    "run-locally": "serverless run 8888"
+    "run-locally": "serverless run dev 8888"
   }
 }
 ```
@@ -178,4 +178,25 @@ export default async function() {
     items: await database.items.findAll({ limit: 10 })
   }
 }
+```
+
+## Globals
+
+The execution envirnoment provides the following utility global variables:
+
+  * `STAGE` — the current "stage" (e.g. `dev`, `prod`, `test`).
+  * `FUNCTION` — the contents of `function.json`.
+
+## Testing
+
+For each function one should also create an `index.test.js` file with unit tests. Example using `mocha`/`chai`:
+
+```js
+import func from '.'
+
+describe('function-name', () => {
+  it('should return some result for some input', async () => {
+    expect(await func(input)).to.deep.equal(output)
+  })
+})
 ```

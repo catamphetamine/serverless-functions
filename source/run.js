@@ -6,9 +6,15 @@ import findFunctions from './findFunctions'
 import installTransformHook from './transform'
 import generateCode from './code/generate'
 
-export default async function run(port, config) {
+export default async function run(stage, port, config) {
 	const functions = await findFunctions()
-	installTransformHook(functions, code => generateCode({ code }, config))
+
+	installTransformHook(functions, (code, filename) => generateCode({
+    func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
+    stage,
+		code
+	}, config))
+
 	await runServer(port, async (requestPath, { query, body, headers }) => {
 		let func
 
@@ -31,10 +37,12 @@ export default async function run(port, config) {
 		}
 
 		const functionFilePath = path.join(func.directory, 'index.js')
-		if (config.cache !== true) {
+		// if (config.cache !== true)
+		if (stage !== 'prod') {
 			delete require.cache[functionFilePath]
 		}
 		const module = require(functionFilePath)
+
 		let response
 		await module.handler({
 			queryStringParameters: query,
