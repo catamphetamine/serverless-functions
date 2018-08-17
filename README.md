@@ -199,3 +199,12 @@ describe('function-name', () => {
   })
 })
 ```
+
+## API
+
+```js
+import { run } from 'serverless-functions/aws-lambda'
+import config from './serverless.json'
+
+await run(stage, port, config, { cwd: process.cwd() })
+```
