@@ -14,6 +14,7 @@ import bundle from '../webpack'
 import findFunctions from '../findFunctions'
 import { validateFunctionDescription } from '../validate'
 import { validateIAMRole } from './utility'
+import generateCode from '../code/generate'
 
 export default async function deploy(functionNames, stage, config, options) {
   const functions = await findFunctions(functionNames)
@@ -86,7 +87,7 @@ async function deployFunction(func, stage, config, options = {}) {
   //   onError:
   //   `
   //     // Notify devs by email about 5XX errors in production.
-  //     if (context.functionName.indexOf(${config.name}-prod-') === 0 &&
+  //     if (event.stageVariables.reportErrors &&
   //       (!error.httpStatusCode || /5\\d\\d/.test(error.httpStatusCode))) {
   //       const errorNotificationText = \`\${context.functionName}\n\n\${error.stack}\n\nhttps://console.aws.amazon.com/cloudwatch/home?region=${config.aws.region}#logEventViewer:group=\${context.logGroupName}stream=\${context.logStreamName}\`
   //       await lib.publish('backend-devs-queue', 'AWS Lambda Error', errorNotificationText)
@@ -111,88 +112,32 @@ async function deployFunction(func, stage, config, options = {}) {
 
   // import $handler from '${functionOutputPath}'
 
-  const outputBasePath = path.resolve(os.tmpdir(), uuid.v4())
-  const functionOutputPath = `${outputBasePath}.js`
+  const UUID = uuid.v4()
+  const outputBasePath = path.resolve(os.tmpdir(), UUID)
   const handlerOutputPath = `${outputBasePath}.handler.js`
   const packageOutputPath = `${outputBasePath}.zip`
+  // const functionOutputPath = `${outputBasePath}.js`
+  // fs.copySync(`${func.directory}/index.js`, functionOutputPath)
 
-  fs.copySync(`${func.directory}/index.js`, functionOutputPath)
+  const handlerOutputPathLocal = path.resolve(func.directory, `index.${uuid.v4()}.js`)
 
-  const handler =
-  `
-    import 'source-map-support/register'
-    // import 'babel-polyfill'
-    import $handler from ${JSON.stringify(functionOutputPath)}
+  // Creates a file in the function directory.
+  // Requires write access to that directory.
+  if (fs.accessSync(handlerOutputPathLocal)) {
+    throw new Error(`File "${handlerOutputPathLocal}" already exists. Delete it manually and re-run the function deploy command.`)
+  }
 
-    ${(options.code && options.code.imports) || ''}
-    export async function handler(event, context, callback) {
-      try {
-        // https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-        const parameters = {
-          event,
-          // context,
-          query: event.queryStringParameters,
-          path: event.pathParameters,
-          headers: event.headers,
-          body: event.body
-        }
-        ${(options.code && options.code.before) || ''}
-        let response = await $handler.call(this, parameters)
-        // Should return a valid JSON response.
-        if (response === undefined) {
-          response = {}
-        }
-        ${(options.code && options.code.after) || ''}
-        callback(null, {
-          // isBase64Encoded: false,
-          statusCode: 200,
-          headers: CORS_HEADERS,
-          body: JSON.stringify(response)
-        })
-      } catch (error) {
-        // CloudWatch error logging.
-        console.error(error)
-        ${(options.code && options.code.onError) || ''}
-        const errorMessage = error.httpStatusCode ? error.message : 'Error'
-        const statusCode = error.httpStatusCode ? error.httpStatusCode : 500
-        callback(null, {
-          // isBase64Encoded: false,
-          statusCode,
-          headers: CORS_HEADERS,
-          body: JSON.stringify({
-            errorMessage,
-            statusCode
-          })
-        })
-      } finally {
-        ${(options.code && options.code.finally) || ''}
-      }
-    }
-
-    const CORS_HEADERS = {
-      // Required for CORS support to work
-      'Access-Control-Allow-Origin' : '*',
-      // Required for cookies, authorization headers with HTTPS
-      'Access-Control-Allow-Credentials' : true
-    }
-  `
-
-  // Could also create a file in the function directory for simplicity.
-  // Though it would require write access to that directory.
-  //
-  // const temporaryOutputPath = `${func.directory}/index.handler.js`
-  // if (fs.accessSync(temporaryOutputPath)) {
-  //   throw new Error(`File "${temporaryOutputPath}" already exists. Delete it manually and re-run.`)
-  // }
-
-  fs.writeFileSync(handlerOutputPath, handler)
+  fs.writeFileSync(handlerOutputPathLocal, generateCode({ path: '.' }, config))
 
   const runtime = config.aws.runtime || 'nodejs6.10'
 
   console.log('Compiling...')
 
   // Bundle the handler using Webpack.
-  await bundle(handlerOutputPath, handlerOutputPath)
+  await bundle(handlerOutputPathLocal, handlerOutputPath)
+
+  // Clean up.
+  fs.unlinkSync(handlerOutputPathLocal)
 
   // Create a zip archive.
   console.log('Zipping...')
@@ -204,6 +149,7 @@ async function deployFunction(func, stage, config, options = {}) {
 
   const { size } = await archive.write()
 
+  // Clean up.
   fs.unlinkSync(functionOutputPath)
   fs.unlinkSync(handlerOutputPath)
   fs.unlinkSync(`${handlerOutputPath}.map`)
@@ -320,6 +266,7 @@ async function deployFunction(func, stage, config, options = {}) {
     await updateFunctionAlias(functionName, stage, result.Version, Lambda)
   }
 
+  // Clean up.
   fs.unlinkSync(packageOutputPath)
 }
 

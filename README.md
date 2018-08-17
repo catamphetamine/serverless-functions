@@ -87,6 +87,7 @@ The function receives the following parameters:
   * `path` — URL path parameters.
   * `query` — URL query parameters.
   * `body` — HTTP request body.
+  * `headers` — HTTP request headers.
 
 ## Output
 
@@ -118,3 +119,63 @@ Currently serverless functions seem to not support streaming HTTP request/respon
 ## AWS Setup
 
 See the [AWS Lambda guide](https://github.com/catamphetamine/serverless-functions/blob/master/README-AWS.md).
+
+## Extending
+
+One can customize the code template used for generating functions. The [template](https://github.com/catamphetamine/serverless-functions/tree/master/source/code/template.js) is:
+
+```js
+$initialize()
+export async function handler(event, context, callback) {
+  try {
+    await $onCall(event, context)
+    const parameters = $createFunctionParameters(event, context)
+    let result = await $handler(parameters)
+    result = (await $onReturn(result)) || result
+    callback(null, $createResponse(result))
+  } catch (error) {
+    await $onError(error)
+    callback($createErrorResponse(error))
+  } finally {
+    await $finally()
+  }
+}
+```
+
+Each of the `$` parameters (except `$handler`) can be customized by adding a respective `code` entry in `serverless.json`:
+
+```js
+{
+  "name": "project-name",
+  "code": {
+    "initialize": "./custom/initialize.js"
+  }
+}
+```
+
+`./custom/initialize.js` file path is resolved against the root project directory (`process.cwd()`).
+
+#### `./custom/initialize.js`
+
+```js
+import Database from './database'
+import config from './config'
+
+// Global variable accessible inside functions.
+let database
+
+function $initialize() {
+  database = new Database(config.database)
+  database.connect()
+}
+```
+
+The global `database` variable can then be used inside functions:
+
+```js
+export default async function() {
+  return {
+    items: await database.items.findAll({ limit: 10 })
+  }
+}
+```

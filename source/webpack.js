@@ -112,22 +112,24 @@ export default function bundle(inputFile, outputFile, options = {}) {
           'process.env.NODE_PG_FORCE_NATIVE': false
         })
       ],
-      // For resolving `babel-loader`.
-      // Setting `context` doesn't work.
-      resolveLoader: {
-        modules: [
-          path.join(process.cwd(), 'node_modules'),
-          'node_modules'
-        ]
-      },
+      // This custom resolving is not required when compiling in the source folder.
+      // // For resolving `babel-loader`.
+      // // Setting `context` doesn't work.
+      // resolveLoader: {
+      //   modules: [
+      //     path.join(process.cwd(), 'node_modules'),
+      //     'node_modules'
+      //   ]
+      // },
       resolve: {
-        // https://webpack.js.org/configuration/resolve/#resolve-modules
-        modules: [
-          // Absolute paths don't work in some cases.
-          // https://github.com/webpack/webpack/issues/7863
-          path.join(process.cwd(), 'node_modules'),
-          'node_modules'
-        ],
+        // This custom resolving is not required when compiling in the source folder.
+        // // https://webpack.js.org/configuration/resolve/#resolve-modules
+        // modules: [
+        //   // Absolute paths don't work in some cases.
+        //   // https://github.com/webpack/webpack/issues/7863
+        //   path.join(process.cwd(), 'node_modules'),
+        //   'node_modules'
+        // ],
         alias: {
           'pg-native': path.resolve(__dirname, './webpack-empty-module.js'),
           ...options.alias

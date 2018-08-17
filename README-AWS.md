@@ -105,4 +105,7 @@ Go to `https://AWS-API-GATEWAY-API-ID.execute-api.REGION.amazonaws.com/STAGE-NAM
 
 Functions receive the following additonal parameters:
 
-  * `event` — AWS Lambda event.
+  * `event` — AWS Lambda [event](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format).
+
+  * `context` — AWS Lambda context.
+

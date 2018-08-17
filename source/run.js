@@ -4,12 +4,14 @@ import bodyParser from 'body-parser'
 
 import findFunctions from './findFunctions'
 import installTransformHook from './transform'
+import generateCode from './code/generate'
 
 export default async function run(port, config) {
 	const functions = await findFunctions()
-	installTransformHook(functions, code => code)
-	await runServer(port, async (requestPath, { query, body }) => {
+	installTransformHook(functions, code => generateCode({ code }, config))
+	await runServer(port, async (requestPath, { query, body, headers }) => {
 		let func
+
 		let pathParameters
 		for (const _func of functions) {
 			pathParameters = matchPath(requestPath, _func)
@@ -18,32 +20,36 @@ export default async function run(port, config) {
 				break
 			}
 		}
+
 		let httpResponse
+
 		if (!func) {
 			return {
 				status: 404,
 				body: 'Not found'
 			}
 		}
-		try {
-			const module = require(path.join(func.directory, 'index.js'))
-			let response = await module.default({
-				query,
-				path: pathParameters,
-				body
-			})
-			response = response || {}
-			return {
-				status: 200,
-				body: JSON.stringify(response)
+
+		const module = require(path.join(func.directory, 'index.js'))
+		let response
+		await module.handler({
+			queryStringParameters: query,
+			pathParameters,
+			body,
+			headers
+		}, {}, (error, result) => {
+			if (error.statusCode) {
+				result = error
+			} else {
+				throw error
 			}
-		} catch (error) {
-			console.error(error)
-			return {
-				status: error.httpStatusCode ? error.httpStatusCode : 500,
-				body: error.httpStatusCode ? error.message : 'Error'
+			response = {
+				status: result.statusCode,
+				headers: result.headers,
+				body: result.body
 			}
-		}
+		})
+		return response
 	})
 }
 
@@ -55,7 +61,8 @@ function runServer(port, handler) {
 		app.use((request, response) => {
 			handler(request.path, {
 				query: request.query,
-				body: request.body
+				body: request.body,
+				headers: request.headers
 			}).then(({ status, contentType, body }) => {
 				response.status(status)
 				response.setHeader('Content-Type', contentType || 'application/json')
