@@ -2,7 +2,7 @@
 
 Prerequisites: read the main [README](https://github.com/catamphetamine/serverless-functions/blob/master/README.md) first.
 
-#### 1. Create role for API Gateway to run Lambdas.
+### 1. Create role for API Gateway to run Lambdas.
 
 * Go to Amazon IAM Management Console (`Services` -> `IAM`) and navigate to "Roles" tab. See [screenshot](https://github.com/catamphetamine/serverless-functions/blob/master/docs/images/aws/api-gateway/aws-iam.png?raw=true).
 
@@ -21,11 +21,11 @@ Prerequisites: read the main [README](https://github.com/catamphetamine/serverle
 }
 ```
 
-#### 2. Create role for Lambdas.
+### 2. Create role for Lambdas.
 
-Create a new role for running Lambdas. When done via GUI it must be created for "API Gateway" service explicitly in order to get the correct "Trust Relationships" (`Service: lambda.amazonaws.com`). Attach an appropriate policy to this new role (e.g. `AWSLambdaFullAccess`).
+Create a new role for running Lambdas. When done via GUI it must be created for "Lambda" service explicitly in order to get the correct "Trust Relationships" (`Service: lambda.amazonaws.com`). Attach an appropriate policy to this new role (e.g. `AWSLambdaFullAccess`).
 
-#### 3. Create user for deploying Lambdas.
+### 3. Create user for deploying Lambdas.
 
 Create a new role for deploying Lambdas and attach the following JSON policy to it:
 
@@ -55,7 +55,7 @@ Create a new role for deploying Lambdas and attach the following JSON policy to 
 
 Create a new user for deploying Lambdas, add the Lambda deployment role to this user, and create an access key for this user.
 
-#### 4. Set up the project.
+### 4. Set up the project.
 
 Add an `aws` entry to the `serverless.json` file of a project:
 
