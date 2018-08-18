@@ -80,9 +80,9 @@ Add new `script`s to project's `package.json`:
 ```js
 {
   "scripts": {
-    "deploy": "serverless deploy dev",
+    "create-api": "serverless create-api",
     "update-routes": "serverless update-routes dev",
-    "create-api": "serverless create-api"
+    "deploy": "serverless deploy dev"
   }
 }
 ```
@@ -93,14 +93,14 @@ If no AWS API Gateway API exists yet then create it:
 npm run create-api dev
 ```
 
-Where `dev` is the name of the new "stage". It is common to create several "stages": `dev` for development, `prod` for production, `test` for testing the code in QA before rolling it out to `prod`. Additional stages can be created in AWS API Gateway dashboard.
+Where `dev` is the name of the new "stage". It is common to create several "stages": `dev` for development, `prod` for production, `test` for testing the code in QA before rolling it out to `prod`. Additional stages can be created in AWS API Gateway dashboard later.
 
 The `create-api` command outputs the new API id: add it as the `aws.apiId` parameter to `serverless.json`.
 
-Deploy the function on the `dev` stage:
+Deploy a function on the `dev` stage:
 
 ```
-npm run deploy <function-name>
+npm run deploy [function-name]
 ```
 
 Deploy the AWS API Gateway routing configuration for the new function on `dev` stage. This is only needed the first time the function is created, or when its `"path"` or `"method"` change:
@@ -117,7 +117,7 @@ Functions receive the following additonal parameters:
 
   * `event` — AWS Lambda [event](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format).
 
-  * `context` — AWS Lambda context.
+  * `context` — AWS Lambda [context](https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html).
 
 ## API
 
