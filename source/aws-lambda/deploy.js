@@ -123,6 +123,7 @@ async function deployFunction(func, stage, config, options) {
     cwd: options.cwd,
     func,
     stage,
+    local: false,
     path: '.'
   }, config))
 

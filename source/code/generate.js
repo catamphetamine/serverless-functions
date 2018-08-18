@@ -10,12 +10,13 @@ const CODE_PIECES = [
 	'createFunctionParameters',
 	'onReturn',
 	'createResponse',
+	'headers',
 	'onError',
 	'createErrorResponse',
 	'finally'
 ]
 
-export default function({ path: functionFilePath, code, func, stage, cwd }, config) {
+export default function({ path: functionFilePath, code, func, stage, local, cwd }, config) {
 	const codePieces = {}
 
 	for (const codePieceName of CODE_PIECES) {
@@ -51,13 +52,17 @@ ${CODE_PIECES.map(_ => codePieces[_]).join(';\n\n')}
 
 const STAGE = ${JSON.stringify(stage)}
 const FUNCTION = JSON.parse(${JSON.stringify(JSON.stringify(func))})
+const LOCAL = ${JSON.stringify(local)}
 
 // Without "global" these constants wouldn't be accessible inside functions.
 // Most likely due to Webpack wrapping modules in closures.
 global.STAGE = STAGE
 global.FUNCTION = FUNCTION
+global.LOCAL = LOCAL
 
-const CORS_HEADERS = {
+// Default CORS HTTP headers.
+// Can be overwritten inside "$initialize()".
+let CORS_HEADERS = {
 	// Required for CORS support to work.
 	'Access-Control-Allow-Origin' : '*',
 	// Required for cookies, authorization headers with HTTPS.

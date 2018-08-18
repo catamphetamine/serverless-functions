@@ -142,7 +142,7 @@ export async function handler(event, context, callback) {
 }
 ```
 
-Each of the `$` parameters (except `$handler`) can be customized by adding a respective `code` entry in `serverless.json`:
+Each of the `$` parameters (except `$handler`) [can be customized](https://github.com/catamphetamine/serverless-functions/tree/master/source/code/pieces) by adding a respective `code` entry in `serverless.json`:
 
 ```js
 {
@@ -183,8 +183,9 @@ export default async function() {
 
 The execution envirnoment provides the following global constants:
 
-  * `STAGE` — the current "stage" (e.g. `dev`, `prod`, `test`).
-  * `FUNCTION` — the contents of `function.json`.
+  * `STAGE : string` — the current "stage" (e.g. `dev`, `prod`, `test`).
+  * `FUNCTION : object` — the contents of `function.json`.
+  * `LOCAL : boolean` — whether the functions are being run locally (`serverless run`) rather than being deployed in a cloud.
 
 ## Testing
 

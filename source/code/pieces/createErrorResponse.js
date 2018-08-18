@@ -4,7 +4,7 @@ function $createErrorResponse(error) {
   return {
     // isBase64Encoded: false,
     statusCode,
-    headers: CORS_HEADERS,
+    headers: $headers(error),
     body: JSON.stringify({
       errorMessage,
       statusCode

@@ -13,6 +13,7 @@ export default async function run(stage, port, config, options = {}) {
 		cwd: options.cwd,
 		func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
 		stage,
+		local: true,
 		code
 	}, config, options), options)
 
@@ -82,9 +83,12 @@ function runServer(port, handler) {
 				query: request.query,
 				body: request.body,
 				headers: request.headers
-			}).then(({ status, contentType, body }) => {
+			}).then(({ status, contentType, headers, body }) => {
 				response.status(status)
-				response.setHeader('Content-Type', contentType || 'application/json')
+				response.set({
+					'Content-Type': contentType || 'application/json',
+					...headers
+				})
 				response.end(body)
 			})
 		})
