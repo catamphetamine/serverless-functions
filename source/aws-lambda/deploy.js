@@ -1,164 +1,26 @@
-import os from 'os'
-import path from 'path'
-import fs from 'fs-extra'
-import filesize from 'filesize'
-import uuid from 'uuid'
-import { ReadableStream } from 'memory-streams'
-import colors from 'colors/safe'
-
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html
 import AWSLambda from 'aws-sdk/clients/lambda'
 
-import Archive from '../Archive'
-import bundle from '../webpack'
-import findFunctions from '../findFunctions'
 import { validateIAMRole } from './utility'
-import generateCode from '../code/generate'
+import deploy, { deployFunction } from '../deploy/deploy'
 
-export default async function deploy(functionNames, stage, config, options = {}) {
-  const functions = await findFunctions(functionNames, options.cwd)
-
-  for (const func of functions) {
-    await deployFunction(func, stage, config, options)
-  }
+export default async function deployLambdas(functionNames, stage, config, options) {
+  return deploy(functionNames, stage, config, {
+    ...options,
+    generateCodeParameters: {
+      region: config.aws.region
+    }
+  }, deployLambda)
 }
 
-async function deployFunction(func, stage, config, options) {
+async function deployLambda(func, zipFile, stage, config) {
+  const functionName = `${config.name}-${func.name}`
+
   const Lambda = new AWSLambda({
     region: config.aws.region,
     accessKeyId: config.aws.accessKeyId,
     secretAccessKey: config.aws.secretAccessKey
   })
-
-  console.log()
-  console.log('-----------------------------------------------------')
-  console.log(`Deploying ${colors.green(func.name)} to ${colors.yellow(stage)} stage.`)
-  console.log('-----------------------------------------------------')
-  console.log()
-
-  // // Bundle the function using Webpack.
-  // const compiledFunction = await bundle(`${func.directory}/index.js`, null, {
-  //   ...
-  // })
-
-  // fs.copySync(`${func.directory}/index.js`, functionOutputPath)
-
-  // const compiledFunction = fs.readFileSync(functionOutputPath).toString()
-
-  // const returnAuthenticationError = `
-  //   if (error.name === 'TokenExpiredError') {
-  //     return callback(JSON.stringify({
-  //       code: 401,
-  //       message: 'TokenExpiredError'
-  //     }))
-  //   }
-  //   return callback(JSON.stringify({
-  //     code: 401,
-  //     message: 'AuthenticationError'
-  //   }))
-  // `
-
-  // let lambdaHandlerGetUser = 'let user'
-  // if (!lambdaDescription.public || lambdaDescription.semiPublic) {
-  //   lambdaHandlerGetUser += `
-  //     try {
-  //       user = await lib.getUser${settings.getUserFromDatabase ? '' : 'Data'}FromToken(event)
-  //     } catch(error) {
-  //       ${lambdaDescription.passAuthenticationError ? 'user = error' : 'console.error(error)' + returnAuthenticationError}
-  //     }
-  //   `
-  //   if (!lambdaDescription.semiPublic) {
-  //     lambdaHandlerGetUser += 'if (!user) return callback(lib.http.code401)'
-  //   }
-  // }
-
-  // const code =
-  // {
-  //   imports: '',
-  //   before:
-  //   `
-  //     // Suspend the Node.js process immediately after response is sent.
-  //     // Fixes Sequelize connection pool preventing Node.js process from terminating.
-  //     context.callbackWaitsForEmptyEventLoop = false
-  //   `
-  //   after: '',
-  //   onError:
-  //   `
-  //     // Notify devs by email about 5XX errors in production.
-  //     if (event.stageVariables.reportErrors &&
-  //       (!error.httpStatusCode || /5\\d\\d/.test(error.httpStatusCode))) {
-  //       const errorNotificationText = \`\${context.functionName}\n\n\${error.stack}\n\nhttps://console.aws.amazon.com/cloudwatch/home?region=${config.aws.region}#logEventViewer:group=\${context.logGroupName}stream=\${context.logStreamName}\`
-  //       await lib.publish('backend-devs-queue', 'AWS Lambda Error', errorNotificationText)
-  //     }
-  //   `,
-  //   finally:
-  //   `
-  //     // // Fixes Sequelize connection pool preventing Node.js process from terminating.
-  //     // // https://github.com/sequelize/sequelize/issues/8468#issuecomment-410451242
-  //     // const pool = lib.sequelize.connectionManager.pool;
-  //     // if (pool) {
-  //     //   // After calling "pool.drain()" the pool seems to be unusable
-  //     //   // so next time when the Lambda gets reused
-  //     //   // (next request comes shortly after the previous one)
-  //     //   // it throws "pool is draining and cannot accept work".
-  //     //   // https://github.com/coopernurse/node-pool#draining
-  //     //   await pool.drain();
-  //     //   await pool.clear();
-  //     // }
-  //   `
-  // }
-
-  // import $handler from '${functionOutputPath}'
-
-  const UUID = uuid.v4()
-  const outputBasePath = path.resolve(os.tmpdir(), UUID)
-  const handlerOutputPath = `${outputBasePath}.handler.js`
-  const packageOutputPath = `${outputBasePath}.zip`
-  // const functionOutputPath = `${outputBasePath}.js`
-  // fs.copySync(`${func.directory}/index.js`, functionOutputPath)
-
-  const handlerOutputPathLocal = path.resolve(func.directory, `index.${uuid.v4()}.js`)
-
-  fs.writeFileSync(handlerOutputPathLocal, generateCode({
-    cwd: options.cwd,
-    func,
-    stage,
-    local: false,
-    path: '.'
-  }, config))
-
-  const runtime = config.aws.runtime || 'nodejs6.10'
-
-  console.log('Compiling...')
-
-  // Bundle the handler using Webpack.
-  await bundle(handlerOutputPathLocal, handlerOutputPath)
-
-  // Clean up.
-  fs.unlinkSync(handlerOutputPathLocal)
-
-  // Create a zip archive.
-  console.log('Zipping...')
-
-  const archive = new Archive(packageOutputPath)
-
-  archive.file(handlerOutputPath, 'index.js')
-  archive.file(`${handlerOutputPath}.map`, 'index.js.map')
-
-  const { size } = await archive.write()
-
-  // Clean up.
-  // fs.unlinkSync(functionOutputPath)
-  fs.unlinkSync(handlerOutputPath)
-  fs.unlinkSync(`${handlerOutputPath}.map`)
-
-  // Print `.zip` file size
-  console.log(filesize(size, { round: 0 }))
-
-  const zipFile = fs.readFileSync(packageOutputPath)
-  // const zipFile = new ReadableStream(output)
-
-  const functionName = `${config.name}-${func.name}`
 
   // If this lamda existed previously then update its code.
   let exists = false
@@ -185,7 +47,7 @@ async function deployFunction(func, stage, config, options) {
     Role: config.aws.role,
     MemorySize: func.memory || 1536,
     Timeout: func.timeout || config.timeout || 15,
-    Runtime: runtime
+    Runtime: config.aws.runtime || 'nodejs6.10'
   }
 
   // Dead Letter Queue (DLQ) receives all events
@@ -263,9 +125,6 @@ async function deployFunction(func, stage, config, options) {
     // Update stage-specific function alias.
     await updateFunctionAlias(functionName, stage, result.Version, Lambda)
   }
-
-  // Clean up.
-  fs.unlinkSync(packageOutputPath)
 }
 
 async function updateFunctionAlias(functionName, alias, version, Lambda)

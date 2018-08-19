@@ -6,7 +6,7 @@ export async function handler(event, context, callback) {
     result = (await $onReturn(result)) || result
     callback(null, $createResponse(result))
   } catch (error) {
-    await $onError(error)
+    await $onError(error, context)
     callback($createErrorResponse(error))
   } finally {
     await $finally()

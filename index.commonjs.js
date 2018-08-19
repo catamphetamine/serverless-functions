@@ -2,4 +2,4 @@
 
 exports = module.exports = {}
 
-exports.run = require('./commonjs/run').default
+exports.run = require('./commonjs/run/run').default

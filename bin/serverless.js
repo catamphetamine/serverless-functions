@@ -7,7 +7,7 @@ var colors = require('colors/safe')
 var createApi = require('../commonjs/aws-lambda/api').createApi
 var updateApi = require('../commonjs/aws-lambda/api').updateApi
 var deploy = require('../commonjs/aws-lambda/deploy').default
-var run = require('../commonjs/run').default
+var run = require('../commonjs/run/run').default
 
 var command = process.argv[2]
 var config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'serverless.json')))

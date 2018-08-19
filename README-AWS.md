@@ -119,6 +119,12 @@ Functions receive the following additonal parameters:
 
   * `context` — AWS Lambda [context](https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html).
 
+## Globals
+
+The execution envirnoment provides the following additional global constants:
+
+  * `REGION : string` — the AWS region the function is deployed in.
+
 ## API
 
 ```js
