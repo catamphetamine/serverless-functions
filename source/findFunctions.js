@@ -37,7 +37,7 @@ function _findFunctions(functionNames, directory, options) {
       if (error) {
         return reject(error)
       }
-      Promise.all(children.map((child) => {
+      Promise.all(children.filter(_ => _ !== 'node_modules').map((child) => {
         return new Promise((resolve, reject) => {
           const childPath = path.join(directory, child)
           fs.stat(childPath, (error, stats) => {
@@ -45,10 +45,6 @@ function _findFunctions(functionNames, directory, options) {
               return reject(error)
             }
             if (stats.isDirectory()) {
-              // Ignore `node_modules`.
-              if (childPath === 'node_modules') {
-                return resolve([])
-              }
               fs.readFile(path.join(childPath, 'function.json'), 'utf8', (error, contents) => {
                 if (error) {
                   // If `function.json` doesn't exist then search recursively.
