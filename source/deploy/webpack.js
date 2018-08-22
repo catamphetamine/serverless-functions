@@ -171,7 +171,6 @@ export default function bundle(inputFile, outputFile, options = {}) {
         return resolve(info)
       }
 
-      console.log(info)
       resolve(fs.readFileSync(outputFile, 'utf-8'))
     })
   })
