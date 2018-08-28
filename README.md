@@ -49,9 +49,9 @@ To create a function create a directory anywhere inside the project directory an
 `index.js` is the function code:
 
 ```js
-export default async function({ path, body, query }) {
+export default async function({ params, body, query }) {
   return {
-    pathParameter: path.parameterName
+    parameter: params.parameterName
   }
 }
 ```
@@ -78,13 +78,13 @@ Run the functions locally:
 npm run run-locally
 ```
 
-Go to `http://localhost:8888/example-function/123`. It should respond with `{ pathParameter: 123 }`.
+Go to `http://localhost:8888/example-function/123`. It should respond with `{ parameter: 123 }`.
 
 ## Input
 
 The function receives the following parameters:
 
-  * `path` — URL path parameters.
+  * `params` — URL path parameters (e.g. `/users/{id}`).
   * `query` — URL query parameters.
   * `body` — HTTP request body.
   * `headers` — HTTP request headers.
