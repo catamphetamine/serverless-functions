@@ -41,10 +41,11 @@ export default function({ path: functionFilePath, code, func, stage, local, regi
 // Source maps for error call stacks.
 import 'source-map-support/register'
 
-// "babel-polyfill" is included as a separate Webpack "entry point" instead.
-// I guess there's no real difference about how to include it.
-// Could be a simple "import".
-// import 'babel-polyfill'
+// "@babel/polyfill" is included as a separate Webpack "entry point" instead.
+// This is because babel polyfill must be "import"ed first
+// and "import"s aren't executed in the order they're specified.
+// Could be "require()"s instead but it's kinda old-fashioned.
+// require('@babel/polyfill')
 
 ${ functionFilePath ? 'import $handler from ' + JSON.stringify(functionFilePath) : code.replace('export default', 'const $handler = ') }
 

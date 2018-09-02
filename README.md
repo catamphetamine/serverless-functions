@@ -13,18 +13,20 @@ Create a `.babelrc` file in it:
 ```
 {
   "presets": [
-    ["env", {
+    ["@babel/preset-env", {
       "targets": {
         "node": "8.10"
       }
     }]
   ],
   "plugins": [
-    "transform-object-rest-spread",
-    "transform-class-properties"
+    "@babel/plugin-proposal-object-rest-spread",
+    "@babel/plugin-proposal-class-properties"
   ]
 }
 ```
+
+(The above example is for Babel 7. For Babel 6 see version [0.2.x](https://github.com/catamphetamine/serverless-functions/tree/0.2.x).)
 
 Create a `serverless.json` file in it:
 

@@ -66,7 +66,7 @@ export default function bundle(inputFile, outputFile, options = {}) {
         hints: false
       },
       context: inputDirectory,
-      entry: ['babel-polyfill', `./${inputFileName}`],
+      entry: ['@babel/polyfill', `./${inputFileName}`],
       target: 'node',
       node: {
         __dirname: true,
