@@ -27,6 +27,7 @@ export default async function run(stage, port, config, options = {}) {
 			return {
 				status: error.statusCode,
 				headers: error.headers,
+				contentType: 'text/plain',
 				body: error.message
 			}
 		}
