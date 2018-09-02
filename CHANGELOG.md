@@ -1,3 +1,10 @@
+0.3.0 / 02.09.2018
+==================
+
+  * (breaking change) Migrated from Babel 6 to Babel 7.
+
+  * (breaking change) Removed the deprecated `path` function parameter (use `params` parameter instead).
+
 0.2.0 / 17.08.2018
 ==================
 
