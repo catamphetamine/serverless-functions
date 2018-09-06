@@ -73,23 +73,17 @@ export default function bundle(inputFile, outputFile, options = {}) {
         __filename: true
       },
       externals : {
-        // `AWS` package is not included because it's not required.
-        // Still there's no guarantee which exact `AWS` version
-        // is present on Lambdas by default.
-        // Hence it's not a safe approach.
-        AWS: 'AWS',
+        // `aws-sdk` is available at runtime.
+        'aws-sdk': 'aws-sdk',
         // Don't know what these two are for.
         fs: 'commonjs fs',
         path: 'commonjs path',
         // Some kind of Microsoft SQL Server support for Sequelize.
         // https://github.com/sequelize/sequelize/issues/7509
         tedious: 'tedious',
-        // `sqlite3` is a "native binding" package
-        // which means it can't be bundled with Webpack.
-        // They seem to be using `require('node-pre-gyp').find`
-        // to "dynamically require your installed binary".
-        // https://www.npmjs.com/package/node-pre-gyp
-        sqlite3: 'sqlite3',
+        // Packages with "native bindings" ("compiled").
+        ...getNativePackageExternals(),
+        // Custom externals.
         ...options.externals
       },
       output: {
@@ -174,4 +168,22 @@ export default function bundle(inputFile, outputFile, options = {}) {
       resolve(fs.readFileSync(outputFile, 'utf-8'))
     })
   })
+}
+
+const NATIVE_PACKAGES = [
+  // `sqlite3` is a "native binding" package
+  // which means it can't be bundled with Webpack.
+  // They seem to be using `require('node-pre-gyp').find`
+  // to "dynamically require your installed binary".
+  // https://www.npmjs.com/package/node-pre-gyp
+  'sqlite3',
+  // `sharp` is an image resizing and manipulation library.
+  'sharp'
+]
+
+function getNativePackageExternals() {
+  return NATIVE_PACKAGES.reduce((all, nativePackage) => {
+    all[nativePackage] = nativePackage
+    return all
+  }, {})
 }
