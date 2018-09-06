@@ -1,6 +1,6 @@
 {
   "name": "serverless-functions",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A toolkit for writing, testing, running and deploying serverless functions (e.g. AWS Lambda).",
   "main": "index.commonjs.js",
   "module": "index.js",
