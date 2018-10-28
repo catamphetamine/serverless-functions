@@ -105,6 +105,14 @@ export default async function() {
 }
 ```
 
+There are some pre-defined errors available:
+
+* `Unauthenticated`
+* `Unauthorized`
+* `NotFound`
+* `Conflict`
+* `InputRejected`
+
 ```js
 import { Unauthorized } from 'serverless-functions/errors'
 
@@ -164,7 +172,7 @@ import Database from './database'
 import config from './config'
 
 function $initialize() {
-  const database = new Database(config.database)
+  const database = new Database(config[STAGE].database)
   database.connect()
   // Make the `database` accessible from functions.
   global.database = database

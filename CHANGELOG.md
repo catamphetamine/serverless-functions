@@ -1,3 +1,14 @@
+0.4.0 / 28.10.2018
+==================
+
+  * (breaking change) `aws.runtime` parameter is now required, previously was defaulting to `"node6.10"`.
+
+  * Fixed code parameters (e.g. `$initialize`) relative `import` paths for `run-locally`.
+
+  * Fixed `babel-polyfill` for `run-locally`.
+
+  * Fixed code parameters being prematurely compiled by Babel.
+
 0.3.0 / 02.09.2018
 ==================
 

@@ -4,6 +4,8 @@ import fs from 'fs'
 import { RESERVED_FUNCTION_DESCRIPTION_PROPERTIES } from '../validate'
 // import { tab, untab } from './tab'
 
+const RELATIVE_IMPORT_REG_EXP = `(import [\\S]+ from ['"]{1})(\\.\\.?/[^'"]+)(['"]{1})`
+
 const CODE_PIECES = [
 	'initialize',
 	'onCall',
@@ -28,6 +30,17 @@ export default function({ path: functionFilePath, code, func, stage, local, regi
 			path.resolve(__dirname, `./pieces/${codePieceName}.js`)
 		,
 		'utf-8')
+
+		// Rebase relative `import` paths (for `run-locally` only)
+		// to become relative to the project's root directory.
+		if (local && config.code[codePieceName]) {
+			codePieces[codePieceName] = codePieces[codePieceName].replace(
+				new RegExp(RELATIVE_IMPORT_REG_EXP, 'g'),
+				(match, p1, p2, p3) => {
+					return p1 + elevateRelativePath(p2, path.relative(cwd || process.cwd(), functionFilePath)) + p3
+				}
+			)
+		}
 	}
 
 	const template = fs.readFileSync(path.resolve(__dirname, './template.js'), 'utf-8')
@@ -47,7 +60,10 @@ import 'source-map-support/register'
 // Could be "require()"s instead but it's kinda old-fashioned.
 // require('@babel/polyfill')
 
-${ functionFilePath ? 'import $handler from ' + JSON.stringify(functionFilePath) : code.replace('export default', 'const $handler = ') }
+// No webpack in "local" mode so including Babel polyfill manually here.
+${ local ? 'import "@babel/polyfill"' : '' }
+
+${ code ? code.replace('export default', 'const $handler = ') : 'import $handler from ' + JSON.stringify(functionFilePath) }
 
 ${CODE_PIECES.map(_ => codePieces[_]).join(';\n\n')}
 
@@ -76,4 +92,31 @@ $initialize()
 
 ${template}
 `
+}
+
+function countOccurences(string, char) {
+	let n = 0
+	let i = 0
+	while (i < string.length) {
+		if (string[i] === char) {
+			n++
+		}
+		i++
+	}
+	return n
+}
+
+function elevateRelativePath(string, depthPath) {
+	// Can be './a/b/c.js' (Linux) or 'a\b\c.js' (Windows).
+	if (depthPath.indexOf('./') === 0) {
+		depthPath = depthPath.slice('./'.length)
+	}
+	const depth = countOccurences(depthPath, path.sep)
+	if (depth === 0) {
+		return string
+	}
+	if (string.indexOf('./') === 0) {
+		string = string.slice('./'.length)
+	}
+	return '../'.repeat(depth) + string
 }

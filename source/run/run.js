@@ -15,7 +15,8 @@ export default async function run(stage, port, config, options = {}) {
 		func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
 		stage,
 		local: true,
-		code
+		code,
+		path: filename
 	}, config, options), options)
 
 	const router = new Router(functions)

@@ -39,10 +39,18 @@ function mtime(filename) {
 export default function compile(code, filename) {
   // merge in base options and resolve all the plugins and presets relative to this file
   const opts = new OptionManager().init(
-    // sourceRoot can be overwritten
     {
       sourceRoot: path.dirname(filename),
       ...deepClone(transformOpts),
+      //
+      // Setting `cwd` to file's directory
+      // otherwise Babel wouldn't compile files
+      // outside of `process.cwd()`.
+      //
+      // A srverless function may require some other api in another folder.
+      // Example: `webapp-backend` requiring `../webapp-api` in `$initialize`.
+      //
+      cwd: path.dirname(filename),
       filename,
     },
   );
@@ -97,19 +105,24 @@ function getTransformOpts(opts) {
   cwd = transformOpts.cwd = path.resolve(cwd);
 
   if (transformOpts.ignore === undefined && transformOpts.only === undefined) {
-    transformOpts.only = [
-      // Only compile things inside the current working directory.
-      new RegExp("^" + escapeRegExp(cwd), "i"),
-    ];
+    // transformOpts.only = [
+    //   // Only compile things inside the current working directory.
+    //   new RegExp("^" + escapeRegExp(cwd), "i"),
+    // ];
     transformOpts.ignore = [
-      // Ignore any node_modules inside the current working directory.
+      // // Ignore any node_modules inside the current working directory.
+      // new RegExp(
+      //   "^" +
+      //     escapeRegExp(cwd) +
+      //     "(?:" +
+      //     path.sep +
+      //     ".*)?" +
+      //     escapeRegExp(path.sep + "node_modules" + path.sep),
+      //   "i",
+      // ),
+      // Ignore any node_modules.
       new RegExp(
-        "^" +
-          escapeRegExp(cwd) +
-          "(?:" +
-          path.sep +
-          ".*)?" +
-          escapeRegExp(path.sep + "node_modules" + path.sep),
+        escapeRegExp(path.sep + "node_modules" + path.sep),
         "i",
       ),
     ];

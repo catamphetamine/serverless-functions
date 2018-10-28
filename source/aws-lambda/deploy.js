@@ -47,7 +47,7 @@ async function deployLambda(func, zipFile, stage, config) {
     Role: config.aws.role,
     MemorySize: func.memory || 1536,
     Timeout: func.timeout || config.timeout || 15,
-    Runtime: config.aws.runtime || 'nodejs6.10'
+    Runtime: config.aws.runtime
   }
 
   // Dead Letter Queue (DLQ) receives all events

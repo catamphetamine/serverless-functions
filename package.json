@@ -1,6 +1,6 @@
 {
   "name": "serverless-functions",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "A toolkit for writing, testing, running and deploying serverless functions (e.g. AWS Lambda).",
   "main": "index.commonjs.js",
   "module": "index.js",
@@ -45,8 +45,8 @@
     "test": "mocha --bail --require @babel/register --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
     "test-coverage": "cross-env NODE_ENV=test nyc mocha --bail --require ./test/setup.js \"source/**/*.test.js\" \"test/**/*.test.js\"",
     "clean-for-build": "rimraf ./commonjs/**/* ./modules/**/*",
-    "build-commonjs-modules": "cross-env BABEL_ENV=commonjs babel ./source --out-dir ./commonjs --source-maps --ignore *.test.js,./code/pieces/*.js,./code/template.js",
-    "build-es6-modules": "cross-env BABEL_ENV=es6 babel ./source --out-dir ./modules --source-maps --ignore *.test.js,./code/pieces/*.js,./code/template.js",
+    "build-commonjs-modules": "cross-env BABEL_ENV=commonjs babel ./source --out-dir ./commonjs --source-maps --ignore *.test.js,source/code/pieces/*.js,source/code/template.js --copy-files",
+    "build-es6-modules": "cross-env BABEL_ENV=es6 babel ./source --out-dir ./modules --source-maps --ignore *.test.js,source/code/pieces/*.js,source/code/template.js --copy-files",
     "copy-template-pieces-commonjs": "copyfiles --flat source/code/pieces/*.js commonjs/code/pieces",
     "copy-template-pieces-es6": "copyfiles --flat source/code/pieces/*.js modules/code/pieces",
     "copy-template-commonjs": "copyfiles --flat source/code/template.js commonjs/code",
