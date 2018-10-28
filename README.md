@@ -179,6 +179,8 @@ function $initialize() {
 }
 ```
 
+Relative `import`s inside "custom" code pieces are resolved against the root project directory too.
+
 The global `database` variable can then be used inside functions:
 
 ```js
