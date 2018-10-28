@@ -33,7 +33,7 @@ export default function({ path: functionFilePath, code, func, stage, local, regi
 
 		// Rebase relative `import` paths (for `run-locally` only)
 		// to become relative to the project's root directory.
-		if (local && config.code[codePieceName]) {
+		if (config.code[codePieceName]) {
 			codePieces[codePieceName] = codePieces[codePieceName].replace(
 				new RegExp(RELATIVE_IMPORT_REG_EXP, 'g'),
 				(match, p1, p2, p3) => {
