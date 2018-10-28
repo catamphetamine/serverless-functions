@@ -45,7 +45,7 @@ export async function deployFunction(func, stage, config, options, deploy) {
     func,
     stage,
     local: false,
-    path: '.',
+    path: path.join(func.directory, 'index.js'),
     ...options.generateCodeParameters
   }, config))
 

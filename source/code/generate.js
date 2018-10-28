@@ -63,7 +63,7 @@ import 'source-map-support/register'
 // No webpack in "local" mode so including Babel polyfill manually here.
 ${ local ? 'import "@babel/polyfill"' : '' }
 
-${ code ? code.replace('export default', 'const $handler = ') : 'import $handler from ' + JSON.stringify(functionFilePath) }
+${ code ? code.replace('export default', 'const $handler = ') : 'import $handler from "."'}
 
 ${CODE_PIECES.map(_ => codePieces[_]).join(';\n\n')}
 
