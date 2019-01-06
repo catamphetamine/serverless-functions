@@ -28,6 +28,8 @@ Create a `.babelrc` file in it:
 
 (The above example is for Babel 7. For Babel 6 see version [0.2.x](https://github.com/catamphetamine/serverless-functions/tree/0.2.x).)
 
+(Support for `babel.config.js` hasn't been tested; `.babelrc` seems to work)
+
 Create a `serverless.json` file in it:
 
 ```js
