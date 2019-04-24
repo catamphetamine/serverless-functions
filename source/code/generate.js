@@ -51,8 +51,12 @@ export default function({ path: functionFilePath, code, func, stage, local, regi
 	}
 
 	return `
-// Source maps for error call stacks.
-import 'source-map-support/register'
+// Using "source-map-support" results in AWS Lambda initialization-time errors
+// having no error message or stack trace.
+// Example: "module initialization error: Error".
+// https://github.com/evanw/node-source-map-support/issues/240
+// // Source maps for error call stacks.
+// import 'source-map-support/register'
 
 // "@babel/polyfill" is included as a separate Webpack "entry point" instead.
 // This is because babel polyfill must be "import"ed first
