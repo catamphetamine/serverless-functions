@@ -1,4 +1,5 @@
 export async function handler(event, context, callback) {
+  $catchUnhandledErrors(context, callback)
   try {
     await $onCall(event, context)
     const parameters = $createFunctionParameters(event, context)

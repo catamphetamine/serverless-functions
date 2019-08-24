@@ -1,7 +1,7 @@
 async function $onError(error, context) {
   // CloudWatch error logging.
-  console.error(error)
-
+  // Uncaught promise rejections have to "stack" for some reason.
+  console.error(error.stack || error)
   // // Notify devs by email about 5XX errors in production.
   // if (STAGE === 'prod' &&
   //   (!error.httpStatusCode || /5\\d\\d/.test(error.httpStatusCode))) {
