@@ -8,6 +8,7 @@ const RELATIVE_IMPORT_REG_EXP = `(import [\\S]+ from ['"]{1})(\\.\\.?/[^'"]+)(['
 
 const CODE_PIECES = [
 	'initialize',
+	'catchUnhandledErrors',
 	'onCall',
 	'createFunctionParameters',
 	'onReturn',
