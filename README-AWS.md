@@ -67,7 +67,7 @@ Add an `aws` entry to the `serverless.json` file of a project:
     "secretAccessKey": "hAx0rDaRkNeThAx0rDaRkNeThAx0rDaRkNeT",
     "apiId": "AWS-API-GATEWAY-API-ID",
     "region": "us-east-1",
-    "runtime": "nodejs8.10",
+    "runtime": "nodejs12.x",
     "role": "arn:aws:iam::1234567890:role/for-running-lambdas"
   }
 }
