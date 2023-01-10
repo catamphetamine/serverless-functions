@@ -52,24 +52,21 @@ export default async function run(stage, port, config, options = {}) {
 		// https://github.com/nodejs/node/issues/43280
 		// const module = await import(`data:text/javascript;base64,${Buffer.from(functionCode).toString(`base64`)}`)
 
-		let uncachePostfix
+		let uncachePostfix = ''
 		// if (config.cache !== true)
 		if (stage !== 'prod') {
 			// Clear `import` cache.
 			// https://ar.al/2021/02/22/cache-busting-in-node.js-dynamic-esm-imports/
 			// https://github.com/nodejs/modules/issues/307#issuecomment-1336020135
-			uncachePostfix = `&timestamp=${Date.now()}`
+			uncachePostfix = `?timestamp=${Date.now()}`
 			// delete require.cache[functionFilePath]
 		}
 
-		const codeTemporaryFilePath = path.join(options.cwd, 'serverless-function.temp.js')
+		const codeTemporaryFilePath = functionFilePath + '.module.js'
 		await writeFilePromise(codeTemporaryFilePath, functionCode)
 		let module
 		try {
-			// Append `?moduleId=${functionFilePath}` prefix so that `import()` doesn't cache
-			// one function's code and return it for all other functions.
-			const moduleUniquePostfix = `?moduleId=${functionFilePath}`
-			module = await import(new URL(`file:///${codeTemporaryFilePath}${moduleUniquePostfix}${uncachePostfix}`))
+			module = await import(new URL(`file:///${codeTemporaryFilePath}${uncachePostfix}`))
 		} finally {
 			await deleteFilePromise(codeTemporaryFilePath)
 		}
