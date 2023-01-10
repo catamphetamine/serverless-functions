@@ -1,23 +1,17 @@
+import fs from 'fs'
 import path from 'path'
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import findFunctions from '../findFunctions'
-import installTransformHook from './transform'
-import generateCode from '../code/generate'
-import Router from './router'
+import findFunctions from '../findFunctions.js'
+import transform, { initializeTransform } from './transform.js'
+import generateCode from '../code/generate.js'
+import Router from './router.js'
 
 export default async function run(stage, port, config, options = {}) {
-	const functions = await findFunctions(null, options.cwd)
+	initializeTransform(options)
 
-	installTransformHook(functions, (code, filename) => generateCode({
-		cwd: options.cwd,
-		func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
-		stage,
-		local: true,
-		code,
-		path: filename
-	}, config, options), options)
+	const functions = await findFunctions(null, options.cwd)
 
 	const router = new Router(functions)
 
@@ -33,12 +27,52 @@ export default async function run(stage, port, config, options = {}) {
 			}
 		}
 
-		const functionFilePath = path.join(func.directory, 'index.js')
+		let functionFilePath = path.join(func.directory, 'index.js')
+
+		// // Convert Windows file path to `file://` protocol URL.
+		// // https://github.com/nodejs/node/issues/20080
+		// functionFilePath = new URL(`file:///${functionFilePath}`)
+
+		// // const module = await import(functionFilePath)
+
+		let functionCode = await readFilePromise(functionFilePath)
+
+		functionCode = transform(functionCode, functionFilePath, (code, filename) => {
+			return generateCode({
+				cwd: options.cwd,
+				func: functions.filter(_ => path.join(_.directory, 'index.js') === filename)[0],
+				stage,
+				local: true,
+				code,
+				path: filename
+			}, config, options)
+		}, { functions })
+
+		// Doesn't work: throws `TypeError: Invalid URL`.
+		// https://github.com/nodejs/node/issues/43280
+		// const module = await import(`data:text/javascript;base64,${Buffer.from(functionCode).toString(`base64`)}`)
+
+		let uncachePostfix
 		// if (config.cache !== true)
 		if (stage !== 'prod') {
-			delete require.cache[functionFilePath]
+			// Clear `import` cache.
+			// https://ar.al/2021/02/22/cache-busting-in-node.js-dynamic-esm-imports/
+			// https://github.com/nodejs/modules/issues/307#issuecomment-1336020135
+			uncachePostfix = `&timestamp=${Date.now()}`
+			// delete require.cache[functionFilePath]
 		}
-		const module = require(functionFilePath)
+
+		const codeTemporaryFilePath = path.join(options.cwd, 'serverless-function.temp.js')
+		await writeFilePromise(codeTemporaryFilePath, functionCode)
+		let module
+		try {
+			// Append `?moduleId=${functionFilePath}` prefix so that `import()` doesn't cache
+			// one function's code and return it for all other functions.
+			const moduleUniquePostfix = `?moduleId=${functionFilePath}`
+			module = await import(new URL(`file:///${codeTemporaryFilePath}${moduleUniquePostfix}${uncachePostfix}`))
+		} finally {
+			await deleteFilePromise(codeTemporaryFilePath)
+		}
 
 		let response
 		await module.handler({
@@ -84,5 +118,38 @@ function runServer(port, handler) {
 			})
 		})
 		app.listen(port, resolve)
+	})
+}
+
+function readFilePromise(path) {
+	return new Promise((resolve, reject) => {
+		fs.readFile(path, (error, fileBuffer) => {
+			if (error) {
+				return reject(error)
+			}
+			return resolve(fileBuffer.toString())
+		})
+	})
+}
+
+function writeFilePromise(path, content) {
+	return new Promise((resolve, reject) => {
+		fs.writeFile(path, content, (error) => {
+			if (error) {
+				return reject(error)
+			}
+			return resolve()
+		})
+	})
+}
+
+function deleteFilePromise(path) {
+	return new Promise((resolve, reject) => {
+		fs.unlink(path, (error) => {
+			if (error) {
+				return reject(error)
+			}
+			return resolve()
+		})
 	})
 }

@@ -58,6 +58,10 @@ export default class Archive {
     this.archive.file(filePath, { name: internalPath })
   }
 
+  directory(directoryPath, internalPath) {
+    this.archive.directory(directoryPath, internalPath);
+  }
+
   append(content, internalPath) {
     this.archive.append(content, { name: internalPath })
   }

@@ -1,3 +1,10 @@
+0.5.0 / 09.01.2022
+==================
+
+* Migrated to `type: module` in `package.json`.
+
+* Migrated `errorMessage` response property to `error` object.
+
 0.4.1 / 28.10.2018
 ==================
 

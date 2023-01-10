@@ -1,4 +1,4 @@
-import { validateIAMRole, getAWSAccountId } from './utility'
+import { validateIAMRole, getAWSAccountId } from './utility.js'
 
 // Swagger 2.0 specification generator.
 // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md

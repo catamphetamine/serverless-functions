@@ -99,7 +99,7 @@ The function can return anything. If it doesn't return anything then an empty ob
 
 ## Errors
 
-To return an error from a function one can throw an instance of `Error` with an optional `httpStatusCode` property. The HTTP Response status code is gonna be the value of the `httpStatusCode` property (or `500`) and the HTTP Response JSON object is gonna contain `errorMessage` and `statusCode` properties.
+To return an error from a function one can throw an instance of `Error` with an optional `httpStatusCode` property. The HTTP Response status code is gonna be the value of the `httpStatusCode` property (or `500`) and the HTTP Response JSON object is gonna contain `error?: object` and `statusCode: number`. The `error` object contains `message: string` and all properties from `error.data`, if it's present.
 
 ```js
 export default async function() {
@@ -147,7 +147,7 @@ export async function handler(event, context, callback) {
     callback(null, $createResponse(result))
   } catch (error) {
     await $onError(error)
-    callback($createErrorResponse(error))
+    callback(null, $createErrorResponse(error))
   } finally {
     await $finally()
   }

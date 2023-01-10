@@ -3,6 +3,8 @@ import fs from 'fs'
 import MemoryFS from 'memory-fs'
 import webpack from 'webpack'
 
+import { getDirname } from '../dirname.js'
+
 // await bundle(inputFile, outputFile)
 export default function bundle(inputFile, outputFile, options = {}) {
   const inputDirectory = path.dirname(inputFile)
@@ -125,7 +127,7 @@ export default function bundle(inputFile, outputFile, options = {}) {
         //   'node_modules'
         // ],
         alias: {
-          'pg-native': path.resolve(__dirname, './webpack-empty-module.js'),
+          'pg-native': path.resolve(getDirname(), './deploy/webpack-empty-module.js'),
           ...options.alias
         },
         // Excluding "module" from `mainFields` to work around Webpack bug

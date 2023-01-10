@@ -1,10 +1,16 @@
 import fs from 'fs'
 import path from 'path'
 
-import { validateFunctionDescription } from './validate'
+import { validateFunctionDescription } from './validate.js'
 
-export default async function findFunctions(functionNames, directory = process.cwd(), options = {}) {
-  const functions = await _findFunctions(functionNames && functionNames.slice(), directory, options)
+/**
+ * Finds function descriptions by their names.
+ * @param  {string[]} [functionNames] — The names of the functions to find. Pass `undefined` to find all functions.
+ * @param  {string} directory – Root directory.
+ * @return {object[]} Function descriptions, each "description" being the contents of `function.json` plus `directory: string` property (an absolute path). To get relative path to the function directory from the root directory one could do: `path.relative(directory, func.directory)`.
+ */
+export default async function findFunctions(functionNames, directory = process.cwd()) {
+  const functions = await _findFunctions(functionNames && functionNames.slice(), directory)
   if (functionNames) {
     const foundFunctionNames = functions.map(_ => _.name)
     const notFoundFunctionNames = functionNames.filter(_ => foundFunctionNames.indexOf(_) < 0)
@@ -16,9 +22,13 @@ export default async function findFunctions(functionNames, directory = process.c
 }
 
 /**
- * (walks the subdirectory tree recursively).
+ * Finds function descriptions by their names.
+ * Walks the directory tree recursively.
+ * @param  {string[]} [functionNames] — The names of the functions to find. Pass `undefined` to find all functions.
+ * @param  {string} directory – Root directory.
+ * @return {object[]} Function descriptions.
  */
-function _findFunctions(functionNames, directory, options) {
+function _findFunctions(functionNames, directory, options = {}) {
   return new Promise((resolve, reject) =>
   {
     if (functionNames && functionNames.length === 0) {

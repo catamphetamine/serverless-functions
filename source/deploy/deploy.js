@@ -3,13 +3,13 @@ import path from 'path'
 import fs from 'fs-extra'
 import filesize from 'filesize'
 import uuid from 'uuid'
-import colors from 'colors/safe'
+import colors from 'colors/safe.js'
 // import { ReadableStream } from 'memory-streams'
 
-import Archive from './archive'
-import bundle from './webpack'
-import findFunctions from '../findFunctions'
-import generateCode from '../code/generate'
+import Archive from './archive.js'
+import bundle from './webpack.js'
+import findFunctions from '../findFunctions.js'
+import generateCode from '../code/generate.js'
 
 export default async function deploy(functionNames, stage, config, options = {}, deploy) {
   const functions = await findFunctions(functionNames, options.cwd)

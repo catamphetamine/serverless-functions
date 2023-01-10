@@ -1,1 +1,1 @@
-exports = module.exports = require('./commonjs/errors')
+export * from './modules/errors.js'

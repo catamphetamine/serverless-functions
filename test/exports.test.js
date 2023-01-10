@@ -1,12 +1,22 @@
 import {
 	run
-} from '../index'
+} from '../index.js'
+
+import Library from '../index.cjs'
 
 import {
 	createApi,
 	updateRoutes,
 	deploy
-} from '../aws-lambda'
+} from '../aws-lambda.js'
+
+import AWSLambda from '../aws-lambda.cjs'
+
+import Errors from '../errors.cjs'
+
+import {
+	InputRejected
+} from '../errors.js'
 
 describe(`exports`, function()
 {
@@ -17,8 +27,6 @@ describe(`exports`, function()
 
 	it(`should export CommonJS`, function()
 	{
-		const Library = require('../index.commonjs')
-
 		Library.run.should.be.a('function')
 	})
 
@@ -27,5 +35,20 @@ describe(`exports`, function()
 		createApi.should.be.a('function')
 		updateRoutes.should.be.a('function')
 		deploy.should.be.a('function')
+	})
+
+	it(`should export AWS Lambda toolkit (CommonJS)`, function()
+	{
+		AWSLambda.createApi.should.be.a('function')
+		AWSLambda.updateRoutes.should.be.a('function')
+		AWSLambda.deploy.should.be.a('function')
+	})
+
+	it(`should export errors`, function() {
+		InputRejected.should.be.a('function')
+	})
+
+	it(`should export errors (CommonJS)`, function() {
+		Errors.InputRejected.should.be.a('function')
 	})
 })

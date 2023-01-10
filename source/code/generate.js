@@ -1,8 +1,10 @@
 import path from 'path'
 import fs from 'fs'
 
-import { RESERVED_FUNCTION_DESCRIPTION_PROPERTIES } from '../validate'
-// import { tab, untab } from './tab'
+import { getDirname } from '../dirname.js'
+
+import { RESERVED_FUNCTION_DESCRIPTION_PROPERTIES } from '../validate.js'
+// import { tab, untab } from './tab.js'
 
 const RELATIVE_IMPORT_REG_EXP = `(import [\\S]+ from ['"]{1})(\\.\\.?/[^'"]+)(['"]{1})`
 
@@ -28,7 +30,7 @@ export default function({ path: functionFilePath, code, func, stage, local, regi
 			?
 			path.resolve(cwd || process.cwd(), config.code[codePieceName])
 			:
-			path.resolve(__dirname, `./pieces/${codePieceName}.js`)
+			path.resolve(getDirname(), `./code/pieces/${codePieceName}.js`)
 		,
 		'utf-8')
 
@@ -44,7 +46,7 @@ export default function({ path: functionFilePath, code, func, stage, local, regi
 		}
 	}
 
-	const template = fs.readFileSync(path.resolve(__dirname, './template.js'), 'utf-8')
+	const template = fs.readFileSync(path.resolve(getDirname(), './code/template.js'), 'utf-8')
 
 	func = { ...func }
 	for (const property of RESERVED_FUNCTION_DESCRIPTION_PROPERTIES) {

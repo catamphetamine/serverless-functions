@@ -1,13 +1,13 @@
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/APIGateway.html
-import APIGateway from 'aws-sdk/clients/apigateway'
+import APIGateway from 'aws-sdk/clients/apigateway.js'
 
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/IAM.html
-import IAM from 'aws-sdk/clients/iam'
+import IAM from 'aws-sdk/clients/iam.js'
 
-import colors from 'colors/safe'
+import colors from 'colors/safe.js'
 
-import generateSwaggerSpecification from './swagger'
-import findFunctions from '../findFunctions'
+import generateSwaggerSpecification from './swagger.js'
+import findFunctions from '../findFunctions.js'
 
 export async function createApi(stage, config, options = {}) {
   const apiGateway = new APIGateway({

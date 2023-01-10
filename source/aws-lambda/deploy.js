@@ -1,8 +1,8 @@
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html
-import AWSLambda from 'aws-sdk/clients/lambda'
+import AWSLambda from 'aws-sdk/clients/lambda.js'
 
-import { validateIAMRole } from './utility'
-import deploy, { deployFunction } from '../deploy/deploy'
+import { validateIAMRole } from './utility.js'
+import deploy, { deployFunction } from '../deploy/deploy.js'
 
 export default async function deployLambdas(functionNames, stage, config, options) {
   return deploy(functionNames, stage, config, {

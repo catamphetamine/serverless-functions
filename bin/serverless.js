@@ -2,12 +2,12 @@
 
 var path = require('path')
 var fs = require('fs')
-var colors = require('colors/safe')
+var colors = require('colors/safe.js')
 
-var createApi = require('../commonjs/aws-lambda/api').createApi
-var updateApi = require('../commonjs/aws-lambda/api').updateApi
-var deploy = require('../commonjs/aws-lambda/deploy').default
-var run = require('../commonjs/run/run').default
+var createApi = require('../commonjs/aws-lambda/api.js').createApi
+var updateApi = require('../commonjs/aws-lambda/api.js').updateApi
+var deploy = require('../commonjs/aws-lambda/deploy.js').default
+var run = require('../commonjs/run/run.js').default
 
 var command = process.argv[2]
 var config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'serverless.json')))

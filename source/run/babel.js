@@ -1,9 +1,9 @@
 // See the full original at:
 // https://github.com/babel/babel/blob/master/packages/babel-register/src/node.js
 
-import deepClone from "lodash/cloneDeep";
+import deepClone from "lodash/cloneDeep.js";
 import sourceMapSupport from "source-map-support";
-import escapeRegExp from "lodash/escapeRegExp";
+import escapeRegExp from "lodash/escapeRegExp.js";
 import * as babel from "@babel/core";
 import { OptionManager, DEFAULT_EXTENSIONS } from "@babel/core";
 import fs from "fs";

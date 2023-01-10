@@ -1,15 +1,12 @@
 // https://stackoverflow.com/a/46971044/970769
-class HTTPError {
-  constructor(message, httpStatusCode) {
-    this.name = this.constructor.name
-    this.message = message
+class HTTPError extends Error {
+  constructor(message, httpStatusCode, data) {
+    super(message)
     this.httpStatusCode = httpStatusCode
-    this.stack = (new Error(message)).stack
+    this.data = data
+    // this.stack = (new Error(message)).stack
   }
 }
-
-HTTPError.prototype = Object.create(Error.prototype)
-HTTPError.prototype.constructor = HTTPError
 
 // 401 Unauthorized.
 // The request requires user authentication.
@@ -23,16 +20,16 @@ export class Unauthenticated extends HTTPError {
 // The user has not enough privileges to perform this action.
 // The server understood the request but refuses to authorize it.
 export class Unauthorized extends HTTPError {
-  constructor(message = 'Not authorized') {
-    super(message, 403)
+  constructor(message = 'Not authorized', data) {
+    super(message, 403, data)
   }
 }
 
 // 404 Not found.
 // The requested resource was not found.
 export class NotFound extends HTTPError {
-  constructor(message = 'Not found') {
-    super(message, 404)
+  constructor(message = 'Not found', data) {
+    super(message, 404, data)
   }
 }
 
@@ -42,8 +39,8 @@ export class NotFound extends HTTPError {
 // This code is used in situations where the user might be able
 // to resolve the conflict and resubmit the request.
 export class Conflict extends HTTPError {
-  constructor(message = 'Conflict') {
-    super(message, 409)
+  constructor(message = 'Conflict', data) {
+    super(message, 409, data)
   }
 }
 
@@ -53,8 +50,8 @@ export class Conflict extends HTTPError {
 // but was unable to process the contained instructions.
 // (e.g. missing a required JSON field)
 export class InputRejected extends HTTPError {
-  constructor(message = 'Input rejected') {
-    super(message, 422)
+  constructor(message = 'Input rejected', data) {
+    super(message, 422, data)
   }
 }
 
